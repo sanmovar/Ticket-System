@@ -1,0 +1,54 @@
+﻿@model Project
+
+@{
+    ViewData["Title"] = "Projekt erstellen";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="fw-bold">➕ Neues Projekt</h2>
+    <a asp-action="Index" class="btn btn-outline-secondary btn-sm">← Zurück</a>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-header bg-success text-white fw-bold">📁 Projekt-Daten</div>
+    <div class="card-body">
+        <form asp-action="Create">
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+            <div class="mb-3">
+                <label asp-for="Titel" class="form-label fw-bold"></label>
+                <input asp-for="Titel" class="form-control" />
+                <span asp-validation-for="Titel" class="text-danger small"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="Beschreibung" class="form-label fw-bold"></label>
+                <textarea asp-for="Beschreibung" class="form-control" rows="4"></textarea>
+                <span asp-validation-for="Beschreibung" class="text-danger small"></span>
+            </div>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label asp-for="Startdatum" class="form-label fw-bold"></label>
+                    <input asp-for="Startdatum" type="date" class="form-control" />
+                    <span asp-validation-for="Startdatum" class="text-danger small"></span>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label asp-for="Enddatum" class="form-label fw-bold"></label>
+                    <input asp-for="Enddatum" type="date" class="form-control" />
+                    <span asp-validation-for="Enddatum" class="text-danger small"></span>
+                </div>
+
+            </div>
+            <div class="d-flex gap-2">
+                <input type="submit" value="✅ Erstellen" class="btn btn-success" />
+                <a asp-action="Index" class="btn btn-outline-secondary">Abbrechen</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

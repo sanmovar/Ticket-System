@@ -1,9 +1,13 @@
 ﻿<!DOCTYPE html>
-<html lang="en">
+<html lang="de" id="htmlRoot">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - Ticket_System</title>
+    <script>
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            document.documentElement.setAttribute('data-bs-theme', savedTheme);
+    </script>
     <script type="importmap"></script>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
@@ -11,9 +15,9 @@
 </head>
 <body>
     <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm bg-body border-bottom box-shadow mb-3">
             <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">Ticket_System</a>
+               
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
                         aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
@@ -21,14 +25,36 @@
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                     <ul class="navbar-nav flex-grow-1">
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                            <a class="nav-link text-body @(ViewContext.RouteData.Values["controller"]?.ToString() == "Home" ? "active fw-bold" : "")"
+                               asp-area="" asp-controller="Home" asp-action="Index">🏠 Home</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+                            <a class="nav-link text-body @(ViewContext.RouteData.Values["controller"]?.ToString() == "Tickets" ? "active fw-bold" : "")"
+                               asp-area="" asp-controller="Tickets" asp-action="Index">🎫 Tickets</a>
                         </li>
+                       
                     </ul>
                 </div>
+            
+                <button id="darkModeToggle" onclick="toggleDarkMode()"
+                        class="btn btn-sm btn-outline-secondary me-2">
+                    🌙
+                </button>
+
+                @if (User.Identity.IsAuthenticated)
+                {
+                    <form asp-controller="Account" asp-action="Logout"
+                          asp-area="" method="post" class="d-inline">
+                        <button type="submit" class="btn btn-outline-danger btn-sm">Abmelden</button>
+                    </form>
+                }
+                else
+                {
+                    <a asp-controller="Account" asp-action="Login"
+                       asp-area="" class="btn btn-outline-primary btn-sm">Anmelden</a>
+                }
             </div>
+
         </nav>
     </header>
     <div class="container">
@@ -39,12 +65,73 @@
 
     <footer class="border-top footer text-muted">
         <div class="container">
-            &copy; 2026 - Ticket_System - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+            2026 - Ticket_System von Andrey Movshovich
         </div>
     </footer>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
+    <script>
+            // Dark Mode umschalten
+            function toggleDarkMode() {
+                const html = document.documentElement;
+                const current = html.getAttribute('data-bs-theme');
+                const next = current === 'dark' ? 'light' : 'dark';
+
+                // Theme setzen und in localStorage speichern
+                html.setAttribute('data-bs-theme', next);
+                localStorage.setItem('theme', next);
+
+                // Button-Icon anpassen
+                document.getElementById('darkModeToggle').textContent =
+                    next === 'dark' ? '☀️' : '🌙';
+            }
+
+            // Button-Icon beim Laden der Seite anpassen
+            document.addEventListener('DOMContentLoaded', () => {
+                const theme = localStorage.getItem('theme') || 'light';
+                document.getElementById('darkModeToggle').textContent =
+                    theme === 'dark' ? '☀️' : '🌙';
+            });
+    </script>
+    <!-- Toast Container -->
+    <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 9999">
+        <div id="appToast" class="toast align-items-center border-0" role="alert">
+            <div class="d-flex">
+                <div class="toast-body fw-bold" id="toastMessage"></div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto"
+                        data-bs-dismiss="toast"></button>
+            </div>
+        </div>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <script>
+                document.addEventListener('DOMContentLoaded', () => showToast('@TempData["Success"]', 'success'));
+        </script>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <script>
+                document.addEventListener('DOMContentLoaded', () => showToast('@TempData["Error"]', 'danger'));
+        </script>
+    }
+
+    <script>
+            function showToast(message, type) {
+                const toastEl = document.getElementById('appToast');
+                const toastMsg = document.getElementById('toastMessage');
+
+                toastEl.classList.remove('text-bg-success', 'text-bg-danger', 'text-bg-warning');
+                toastEl.classList.add(`text-bg-${type}`);
+                toastMsg.textContent = message;
+
+                const toast = new bootstrap.Toast(toastEl, { delay: 3000 });
+                toast.show();
+            }
+    </script>
+
 </body>
 </html>

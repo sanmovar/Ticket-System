@@ -1,0 +1,57 @@
+﻿@model Ticket
+
+@{
+    ViewData["Title"] = "Neues Ticket";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="fw-bold">➕ Neues Ticket</h2>
+    <a asp-action="Index" class="btn btn-outline-secondary btn-sm">← Zurück</a>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-header bg-primary text-white fw-bold">🎫 Ticket-Daten</div>
+    <div class="card-body">
+        <form asp-action="Create" method="post">
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+            <div class="mb-3">
+                <label asp-for="Titel" class="form-label fw-bold">Titel</label>
+                <input asp-for="Titel" class="form-control" />
+                <span asp-validation-for="Titel" class="text-danger small"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="Beschreibung" class="form-label fw-bold">Beschreibung</label>
+                <textarea asp-for="Beschreibung" class="form-control" rows="4"></textarea>
+                <span asp-validation-for="Beschreibung" class="text-danger small"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="ProjektId" class="form-label fw-bold">Projekt</label>
+                <select asp-for="ProjektId" class="form-select"
+                        asp-items="ViewBag.ProjektId">
+                    <option value="">-- Projekt auswählen --</option>
+                </select>
+                <span asp-validation-for="ProjektId" class="text-danger small"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="ZugewiesenerBenutzerId" class="form-label fw-bold">
+                    Zuweisen an (optional)
+                </label>
+                <select asp-for="ZugewiesenerBenutzerId" class="form-select"
+                        asp-items="ViewBag.ZugewiesenerBenutzerId">
+                    <option value="">-- Niemanden zuweisen --</option>
+                </select>
+            </div>
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-primary">✅ Ticket erstellen</button>
+                <a asp-action="Index" class="btn btn-outline-secondary">Abbrechen</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

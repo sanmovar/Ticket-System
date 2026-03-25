@@ -1,25 +1,48 @@
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using System.Diagnostics;
+using Microsoft.EntityFrameworkCore;
+using Ticket_System.Data;
 using Ticket_System.Models;
 
 namespace Ticket_System.Controllers
 {
     public class HomeController : Controller
     {
-        public IActionResult Index()
+        private readonly AppDbContext _context;
+        private readonly UserManager<IdentityUser> _userManager;
+
+        public HomeController(AppDbContext context, UserManager<IdentityUser> userManager)
         {
-            return View();
+            _context = context;
+            _userManager = userManager;
         }
 
-        public IActionResult Privacy()
+        public async Task<IActionResult> Index()
         {
-            return View();
-        }
+            var statistik = new StatistikDto();
 
-        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        public IActionResult Error()
-        {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+            if (User.Identity!.IsAuthenticated)
+            {
+                // Ticket-Statistiken
+                statistik.TicketsGesamt = await _context.Tickets.CountAsync();
+                statistik.TicketsGeschlossen = await _context.Tickets
+                    .CountAsync(t => t.GeschlossenAm != null);
+                statistik.TicketsOffen = statistik.TicketsGesamt - statistik.TicketsGeschlossen;
+
+                // Projekt-Statistiken
+                statistik.ProjekteGesamt = await _context.Projects.CountAsync();
+                statistik.ProjekteBeendet = await _context.Projects
+                    .CountAsync(p => p.Enddatum != null && p.Enddatum < DateTime.Now);
+                statistik.ProjekteAktiv = statistik.ProjekteGesamt - statistik.ProjekteBeendet;
+
+                // Benutzer-Statistiken 
+                statistik.BenutzerGesamt = _userManager.Users.Count();
+                statistik.AnzahlAdmins = (await _userManager.GetUsersInRoleAsync("Admin")).Count;
+                statistik.AnzahlDeveloper = (await _userManager.GetUsersInRoleAsync("Developer")).Count;
+                statistik.AnzahlTester = (await _userManager.GetUsersInRoleAsync("Tester")).Count;
+            }
+
+            return View(statistik);
         }
     }
 }

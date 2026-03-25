@@ -1,0 +1,58 @@
+﻿@model IEnumerable<Ticket>
+
+@{
+    ViewData["Title"] = "Tickets";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="fw-bold">🎫 Tickets</h2>
+    <a asp-action="Create" class="btn btn-primary">
+        ➕ Neues Ticket
+    </a>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-body p-0">
+        <table class="table table-hover mb-0">
+            <thead class="table-dark">
+                <tr>
+                    <th>Titel</th>
+                    <th>Projekt</th>
+                    <th>Erstellt am</th>
+                    <th>Zugewiesen an</th>
+                    <th>Status</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var ticket in Model)
+                {
+                    <tr>
+                        <td class="fw-bold">@ticket.Titel</td>
+                        <td class="text-muted">@ticket.Projekt?.Titel</td>
+                        <td>@ticket.ErstelltAm.ToString("dd.MM.yyyy")</td>
+                        <td>@(ticket.ZugewiesenerBenutzer?.UserName ?? "-")</td>
+                        <td>
+                            @if (ticket.GeschlossenAm != null)
+                            {
+                                <span class="badge bg-success">Geschlossen</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-warning text-dark">Offen</span>
+                            }
+                        </td>
+                        <td class="text-end">
+                            <a asp-action="Details" asp-route-id="@ticket.Id"
+                               class="btn btn-sm btn-outline-secondary">🔍</a>
+                            <a asp-action="Edit" asp-route-id="@ticket.Id"
+                               class="btn btn-sm btn-outline-primary">✏️</a>
+                            <a asp-action="Delete" asp-route-id="@ticket.Id"
+                               class="btn btn-sm btn-outline-danger">🗑️</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
