@@ -5,13 +5,15 @@
 }
 
 <div class="d-flex justify-content-between align-items-center mb-4">
-    <h2 class="fw-bold">🔍 Ticket Details</h2>
-    <a asp-action="Index" class="btn btn-outline-secondary btn-sm">← Zurück</a>
+    <h2 class="fw-bold"><i class="bi bi-eye me-2"></i>Ticket Details</h2>
+    <a asp-action="Index" class="btn btn-outline-secondary btn-sm">
+        <i class="bi bi-arrow-left me-1"></i>Zurück
+    </a>
 </div>
 
 <div class="card shadow-sm">
-    <div class="card-header bg-secondary text-white fw-bold">
-        🎫 @Model.Titel
+    <div class="card-header badge-outline-secondary fw-bold">
+        <i class="bi bi-ticket-perforated me-2"></i>@Model.Titel
     </div>
     <div class="card-body">
         <dl class="row mb-0">
@@ -40,7 +42,9 @@
             <dd class="col-sm-9">
                 @if (Model.GeschlossenAm != null)
                 {
-                    <span class="badge bg-success">Geschlossen</span>
+                    <span class="badge badge-outline-success">
+                        <i class="bi bi-check-circle me-1"></i>Geschlossen
+                    </span>
                     <small class="text-muted ms-2">
                         von @Model.GeschlossenVon?.UserName
                         am @Model.GeschlossenAm?.ToString("dd.MM.yyyy HH:mm")
@@ -48,7 +52,9 @@
                 }
                 else
                 {
-                    <span class="badge bg-warning text-dark">Offen</span>
+                    <span class="badge badge-outline-warning">
+                        <i class="bi bi-unlock me-1"></i>Offen
+                    </span>
                 }
             </dd>
         </dl>
@@ -57,13 +63,64 @@
     @if (Model.GeschlossenAm == null)
     {
         <div class="card-footer d-flex gap-2">
-            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary btn-sm">✏️ Bearbeiten</a>
+            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-outline-primary btn-sm">
+                <i class="bi bi-pencil me-1"></i>Bearbeiten
+            </a>
             <form asp-action="Close" asp-route-id="@Model.Id" method="post" class="d-inline">
-                <button type="submit" class="btn btn-danger btn-sm"
+                <button type="submit" class="btn btn-outline-danger btn-sm"
                         onclick="return confirm('Ticket wirklich schließen?')">
-                    🔒 Ticket schließen
+                    <i class="bi bi-lock me-1"></i>Ticket schließen
                 </button>
             </form>
         </div>
     }
 </div>
+
+<hr class="my-4" />
+
+<h4 class="fw-bold mb-3"><i class="bi bi-chat-left-text me-2"></i>Kommentare</h4>
+
+@if (Model.Comments != null && Model.Comments.Any())
+{
+    <div class="list-group mb-3">
+        @foreach (var c in Model.Comments.OrderByDescending(c => c.Erstellzeitpunkt))
+        {
+            <div class="list-group-item">
+                <div class="d-flex justify-content-between">
+                    <strong><i class="bi bi-person me-1"></i>@(c.Ersteller?.UserName ?? "Unbekannt")</strong>
+                    <small class="text-muted">
+                        <i class="bi bi-clock me-1"></i>@c.Erstellzeitpunkt.ToString("dd.MM.yyyy HH:mm")
+                    </small>
+                </div>
+                <div class="mt-2">
+                    @c.Inhalt
+                </div>
+            </div>
+        }
+    </div>
+}
+else
+{
+    <p class="text-muted"><i class="bi bi-info-circle me-1"></i>Noch keine Kommentare vorhanden.</p>
+}
+
+@if (Model.GeschlossenAm == null)
+{
+    <div class="card shadow-sm mt-3">
+        <div class="card-header fw-bold">
+            <i class="bi bi-pencil-square me-2"></i>Neuen Kommentar schreiben
+        </div>
+        <div class="card-body">
+            <form asp-action="AddComment" method="post">
+                <input type="hidden" name="ticketId" value="@Model.Id" />
+                <div class="mb-3">
+                    <textarea name="inhalt" class="form-control" rows="3"
+                              placeholder="Dein Kommentar..."></textarea>
+                </div>
+                <button type="submit" class="btn btn-outline-primary btn-sm">
+                    <i class="bi bi-chat-left-dots me-1"></i>Kommentar hinzufügen
+                </button>
+            </form>
+        </div>
+    </div>
+}

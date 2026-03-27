@@ -5,12 +5,16 @@
 }
 
 <div class="d-flex justify-content-between align-items-center mb-4">
-    <h2 class="fw-bold">➕ Neues Ticket</h2>
-    <a asp-action="Index" class="btn btn-outline-secondary btn-sm">← Zurück</a>
+    <h2 class="fw-bold"><i class="bi bi-plus-circle me-2"></i>Neues Ticket</h2>
+    <a asp-action="Index" class="btn btn-outline-secondary btn-sm">
+        <i class="bi bi-arrow-left me-1"></i>Zurück
+    </a>
 </div>
 
 <div class="card shadow-sm">
-    <div class="card-header bg-primary text-white fw-bold">🎫 Ticket-Daten</div>
+    <div class="card-header badge-outline-primary text-white fw-bold">
+        <i class="bi bi-ticket-perforated me-2"></i>Ticket-Daten
+    </div>
     <div class="card-body">
         <form asp-action="Create" method="post">
             <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
@@ -43,8 +47,12 @@
                 </select>
             </div>
             <div class="d-flex gap-2">
-                <button type="submit" class="btn btn-primary">✅ Ticket erstellen</button>
-                <a asp-action="Index" class="btn btn-outline-secondary">Abbrechen</a>
+                <button type="submit" class="btn btn-outline-primary">
+                    <i class="bi bi-check-circle me-1"></i>Ticket erstellen
+                </button>
+                <a asp-action="Index" class="btn btn-outline-secondary">
+                    <i class="bi bi-x-circle me-1"></i>Abbrechen
+                </a>
             </div>
         </form>
     </div>

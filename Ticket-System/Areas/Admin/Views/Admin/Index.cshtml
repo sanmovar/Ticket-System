@@ -3,21 +3,23 @@
 }
 
 <div class="text-center mb-5">
-    <h1 class="display-5 fw-bold">⚙️ Admin-Bereich</h1>
+    <h1 class="display-5 fw-bold">
+        <i class="bi bi-gear me-2"></i>Admin-Bereich
+    </h1>
     <p class="lead text-muted">Hier kannst du die Stammdaten der App verwalten.</p>
 </div>
 
 <div class="row g-4 justify-content-center">
     <div class="col-md-4">
         <div class="card shadow-sm h-100">
-            <div class="card-header bg-success text-white fw-bold">
-                📁 Projekte
+            <div class="card-header card-header-outline-success fw-bold">
+                <i class="bi bi-folder me-2"></i>Projekte
             </div>
             <div class="card-body">
                 <p class="card-text text-muted">Projekte erstellen, bearbeiten und löschen.</p>
                 <a asp-controller="Projects" asp-action="Index" asp-area="Admin"
-                       class="btn btn-success w-100">
-                    Projekte verwalten
+                       class="btn btn-outline-success w-100">
+                    <i class="bi bi-arrow-right-circle me-2"></i>Projekte verwalten
                 </a>
             </div>
         </div>

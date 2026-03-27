@@ -23,10 +23,25 @@ namespace Ticket_System.Areas.Admin.Controllers
         }
 
         // GET: Admin/Projects
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(int pageSize = 10, int page = 1)
         {
-            return View(await _context.Projects.ToListAsync());
+            var query = _context.Projects.AsQueryable();
+
+            int totalCount = await query.CountAsync();
+            var projects = await query
+                .OrderBy(p => p.Titel)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            ViewBag.PageSize = pageSize;
+            ViewBag.Page = page;
+            ViewBag.TotalCount = totalCount;
+            ViewBag.TotalPages = (int)Math.Ceiling((double)totalCount / pageSize);
+
+            return View(projects);
         }
+
 
         // GET: Admin/Projects/Details/5
         public async Task<IActionResult> Details(int? id)
@@ -63,7 +78,7 @@ namespace Ticket_System.Areas.Admin.Controllers
             {
                 _context.Add(project);
                 await _context.SaveChangesAsync();
-                TempData["Success"] = "✅ Projekt wurde erfolgreich erstellt!";
+                TempData["Success"] = "Projekt wurde erfolgreich erstellt!";
                 return RedirectToAction(nameof(Index));
             }
             return View(project);
@@ -115,7 +130,7 @@ namespace Ticket_System.Areas.Admin.Controllers
                         throw;
                     }
                 }
-                TempData["Success"] = "✅ Projekt wurde erfolgreich gespeichert!";
+                TempData["Success"] = "Projekt wurde erfolgreich gespeichert!";
                 return RedirectToAction(nameof(Index));
             }
             return View(project);
@@ -151,7 +166,7 @@ namespace Ticket_System.Areas.Admin.Controllers
             }
 
             await _context.SaveChangesAsync();
-            TempData["Success"] = "🗑️ Projekt wurde erfolgreich gelöscht!";
+            TempData["Success"] = "Projekt wurde erfolgreich gelöscht!";
             return RedirectToAction(nameof(Index));
         }
 

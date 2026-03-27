@@ -5,17 +5,19 @@
 }
 
 <div class="text-center mb-5">
-    <h1 class="display-5 fw-bold">🎫 Ticket-System</h1>
+    <h1 class="display-5 fw-bold">
+        <i class="bi bi-ticket-perforated me-2"></i>Ticket-System
+    </h1>
     <p class="lead text-muted">Willkommen! Wähle einen Bereich:</p>
 
     <div class="d-flex justify-content-center gap-3 mt-3">
-        <a asp-controller="Tickets" asp-action="Index" class="btn btn-primary btn-lg">
-            🎫 Ticket-Bereich
+        <a asp-controller="Tickets" asp-action="Index" class="btn btn-outline-primary btn-lg">
+            <i class="bi bi-ticket-perforated me-2"></i>Ticket-Bereich
         </a>
         @if (User.IsInRole("Admin"))
         {
-            <a asp-controller="Admin" asp-action="Index" class="btn btn-danger btn-lg">
-                ⚙️ Admin-Bereich
+            <a asp-controller="Admin" asp-action="Index" class="btn btn-outline-danger btn-lg">
+                <i class="bi bi-gear me-2"></i>Admin-Bereich
             </a>
         }
     </div>
@@ -23,27 +25,30 @@
 
 @if (User.Identity!.IsAuthenticated)
 {
-    <h4 class="mb-4">📊 Statistiken</h4>
+    <h4 class="mb-4">
+        <i class="bi bi-bar-chart-line me-2"></i>Statistiken
+    </h4>
     <div class="row g-4">
 
         <!-- Tickets -->
         <div class="col-md-4">
             <div class="card h-100 shadow-sm">
-                <div class="card-header bg-primary text-white fw-bold">
-                    🎫 Tickets
+                <div class="card-header fw-bold card-header-outline-primary">
+                    <i class="bi bi-ticket-perforated me-2"></i>Tickets
                 </div>
+
                 <ul class="list-group list-group-flush">
                     <li class="list-group-item d-flex justify-content-between">
-                        <span>Gesamt</span>
-                        <span class="badge bg-secondary rounded-pill">@Model.TicketsGesamt</span>
+                        <span><i class="bi bi-stack me-1 text-secondary"></i>Gesamt</span>
+                        <span class="badge badge-outline-secondary rounded-pill">@Model.TicketsGesamt</span>
                     </li>
                     <li class="list-group-item d-flex justify-content-between">
-                        <span>Offen</span>
-                        <span class="badge bg-warning text-dark rounded-pill">@Model.TicketsOffen</span>
+                        <span><i class="bi bi-unlock me-1 text-warning"></i>Offen</span>
+                        <span class="badge badge-outline-warning rounded-pill">@Model.TicketsOffen</span>
                     </li>
                     <li class="list-group-item d-flex justify-content-between">
-                        <span>Geschlossen</span>
-                        <span class="badge bg-success rounded-pill">@Model.TicketsGeschlossen</span>
+                        <span><i class="bi bi-check-circle me-1 text-success"></i>Geschlossen</span>
+                        <span class="badge badge-outline-success rounded-pill">@Model.TicketsGeschlossen</span>
                     </li>
                 </ul>
             </div>
@@ -52,50 +57,50 @@
         <!-- Projekte -->
         <div class="col-md-4">
             <div class="card h-100 shadow-sm">
-                <div class="card-header bg-success text-white fw-bold">
-                    📁 Projekte
+                <div class="card-header card-header-outline-success fw-bold">
+                    <i class="bi bi-folder me-2"></i>Projekte
                 </div>
                 <ul class="list-group list-group-flush">
                     <li class="list-group-item d-flex justify-content-between">
-                        <span>Gesamt</span>
-                        <span class="badge bg-secondary rounded-pill">@Model.ProjekteGesamt</span>
+                        <span><i class="bi bi-stack me-1 text-secondary"></i>Gesamt</span>
+                        <span class="badge badge-outline-secondary rounded-pill">@Model.ProjekteGesamt</span>
                     </li>
                     <li class="list-group-item d-flex justify-content-between">
-                        <span>Aktiv</span>
-                        <span class="badge bg-warning text-dark rounded-pill">@Model.ProjekteAktiv</span>
+                        <span><i class="bi bi-play-circle me-1 text-warning"></i>Aktiv</span>
+                        <span class="badge badge-outline-warning rounded-pill">@Model.ProjekteAktiv</span>
                     </li>
                     <li class="list-group-item d-flex justify-content-between">
-                        <span>Beendet</span>
-                        <span class="badge bg-success rounded-pill">@Model.ProjekteBeendet</span>
+                        <span><i class="bi bi-flag me-1 text-success"></i>Beendet</span>
+                        <span class="badge badge-outline-success rounded-pill">@Model.ProjekteBeendet</span>
                     </li>
                 </ul>
             </div>
         </div>
 
-        <!-- Benutzer (optional) -->
+        <!-- Benutzer (nur Admin) -->
         @if (User.IsInRole("Admin"))
         {
             <div class="col-md-4">
                 <div class="card h-100 shadow-sm">
-                    <div class="card-header bg-danger text-white fw-bold">
-                        👥 Benutzer
+                    <div class="card-header card-header-outline-danger fw-bold">
+                        <i class="bi bi-people me-2"></i>Benutzer
                     </div>
                     <ul class="list-group list-group-flush">
                         <li class="list-group-item d-flex justify-content-between">
-                            <span>Gesamt</span>
-                            <span class="badge bg-secondary rounded-pill">@Model.BenutzerGesamt</span>
+                            <span><i class="bi bi-stack me-1 text-secondary"></i>Gesamt</span>
+                            <span class="badge badge-outline-secondary rounded-pill">@Model.BenutzerGesamt</span>
                         </li>
                         <li class="list-group-item d-flex justify-content-between">
-                            <span>Admins</span>
-                            <span class="badge bg-danger rounded-pill">@Model.AnzahlAdmins</span>
+                            <span><i class="bi bi-shield me-1 text-danger"></i>Admins</span>
+                            <span class="badge badge-outline-danger rounded-pill">@Model.AnzahlAdmins</span>
                         </li>
                         <li class="list-group-item d-flex justify-content-between">
-                            <span>Developer</span>
-                            <span class="badge bg-primary rounded-pill">@Model.AnzahlDeveloper</span>
+                            <span><i class="bi bi-code-slash me-1 text-primary"></i>Developer</span>
+                            <span class="badge badge-outline-primary rounded-pill">@Model.AnzahlDeveloper</span>
                         </li>
                         <li class="list-group-item d-flex justify-content-between">
-                            <span>Tester</span>
-                            <span class="badge bg-info text-dark rounded-pill">@Model.AnzahlTester</span>
+                            <span><i class="bi bi-bug me-1 text-info"></i>Tester</span>
+                            <span class="badge badge-outline-info rounded-pill">@Model.AnzahlTester</span>
                         </li>
                     </ul>
                 </div>
@@ -107,6 +112,6 @@
 else
 {
     <div class="alert alert-info text-center mt-4">
-        🔒 Bitte <a asp-controller="Account" asp-action="Login">anmelden</a>, um Statistiken zu sehen.
+        <i class="bi bi-lock me-2"></i>Bitte <a asp-controller="Account" asp-action="Login">anmelden</a>, um Statistiken zu sehen.
     </div>
 }

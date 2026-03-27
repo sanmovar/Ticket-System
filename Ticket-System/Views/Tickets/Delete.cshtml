@@ -5,13 +5,15 @@
 }
 
 <div class="d-flex justify-content-between align-items-center mb-4">
-    <h2 class="fw-bold text-danger">🗑️ Ticket löschen</h2>
-    <a asp-action="Index" class="btn btn-outline-secondary btn-sm">← Zurück</a>
+    <h2 class="fw-bold text-danger"><i class="bi bi-trash3 me-2"></i>Ticket löschen</h2>
+    <a asp-action="Index" class="btn btn-outline-secondary btn-sm">
+        <i class="bi bi-arrow-left me-1"></i>Zurück
+    </a>
 </div>
 
 <div class="card border-danger shadow-sm">
-    <div class="card-header bg-danger text-white fw-bold">
-        ⚠️ Wirklich löschen?
+    <div class="card-header badge-outline-danger fw-bold">
+        <i class="bi bi-exclamation-triangle me-2"></i>Wirklich löschen?
     </div>
     <div class="card-body">
         <dl class="row mb-0">
@@ -34,20 +36,29 @@
             <dd class="col-sm-9">
                 @if (Model.GeschlossenAm != null)
                 {
-                    <span class="badge bg-success">Geschlossen</span>
+                    <span class="badge badge-outline-success">
+                        <i class="bi bi-check-circle me-1"></i>Geschlossen
+                    </span>
                 }
                 else
                 {
-                    <span class="badge bg-warning text-dark">Offen</span>
+                    <span class="badge badge-outline-warning">
+                        <i class="bi bi-unlock me-1"></i>Offen
+                    </span>
                 }
             </dd>
         </dl>
     </div>
     <div class="card-footer d-flex gap-2">
-        <form asp-action="Delete">
+        <form asp-action="Delete" method="post">
             <input type="hidden" asp-for="Id" />
-            <button type="submit" class="btn btn-danger">🗑️ Ja, löschen</button>
+            <button type="submit" class="btn btn-outline-danger">
+                <i class="bi bi-trash3 me-1"></i>Ja, löschen
+            </button>
         </form>
-        <a asp-action="Index" class="btn btn-outline-secondary">Abbrechen</a>
+
+        <a asp-action="Index" class="btn btn-outline-secondary">
+            <i class="bi bi-x-circle me-1"></i>Abbrechen
+        </a>
     </div>
 </div>

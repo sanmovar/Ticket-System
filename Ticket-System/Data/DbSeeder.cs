@@ -26,6 +26,9 @@ namespace Ticket_System.Data
             await CreateUserAsync(userManager, "admin@ticket.de", "Admin123", "Admin");
             await CreateUserAsync(userManager, "dev@ticket.de", "Admin123", "Developer");
             await CreateUserAsync(userManager, "tester@ticket.de", "Admin123", "Tester");
+            await CreateUserAsync(userManager, "admin1@ticket.de", "Admin123", "Admin");
+            await CreateUserAsync(userManager, "dev1@ticket.de", "Admin123", "Developer");
+            await CreateUserAsync(userManager, "tester1@ticket.de", "Admin123", "Tester");
         }
 
         // Hilfsmethode: Benutzer erstellen und Rolle zuweisen

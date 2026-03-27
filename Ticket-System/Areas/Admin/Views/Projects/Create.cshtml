@@ -5,12 +5,16 @@
 }
 
 <div class="d-flex justify-content-between align-items-center mb-4">
-    <h2 class="fw-bold">➕ Neues Projekt</h2>
-    <a asp-action="Index" class="btn btn-outline-secondary btn-sm">← Zurück</a>
+    <h2 class="fw-bold"><i class="bi bi-plus-circle me-2"></i>Neues Projekt</h2>
+    <a asp-action="Index" class="btn btn-outline-secondary btn-sm">
+        <i class="bi bi-arrow-left me-1"></i>Zurück
+    </a>
 </div>
 
 <div class="card shadow-sm">
-    <div class="card-header bg-success text-white fw-bold">📁 Projekt-Daten</div>
+    <div class="card-header badge-outline-success fw-bold">
+        <i class="bi bi-folder me-2"></i>Projekt-Daten
+    </div>
     <div class="card-body">
         <form asp-action="Create">
             <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
@@ -31,17 +35,19 @@
                     <input asp-for="Startdatum" type="date" class="form-control" />
                     <span asp-validation-for="Startdatum" class="text-danger small"></span>
                 </div>
-
                 <div class="col-md-6 mb-3">
                     <label asp-for="Enddatum" class="form-label fw-bold"></label>
                     <input asp-for="Enddatum" type="date" class="form-control" />
                     <span asp-validation-for="Enddatum" class="text-danger small"></span>
                 </div>
-
             </div>
             <div class="d-flex gap-2">
-                <input type="submit" value="✅ Erstellen" class="btn btn-success" />
-                <a asp-action="Index" class="btn btn-outline-secondary">Abbrechen</a>
+                <button type="submit" class="btn btn-outline-success">
+                    <i class="bi bi-check-circle me-1"></i>Erstellen
+                </button>
+                <a asp-action="Index" class="btn btn-outline-secondary">
+                    <i class="bi bi-x-circle me-1"></i>Abbrechen
+                </a>
             </div>
         </form>
     </div>

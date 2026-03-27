@@ -5,11 +5,29 @@
 }
 
 <div class="d-flex justify-content-between align-items-center mb-4">
-    <h2 class="fw-bold">📁 Projekte</h2>
-    <a asp-action="Create" class="btn btn-success">
-        ➕ Neues Projekt
+    <h2 class="fw-bold"><i class="bi bi-folder me-2"></i>Projekte</h2>
+    <a asp-action="Create" class="btn btn-outline-success">
+        <i class="bi bi-plus-circle me-2"></i>Neues Projekt
     </a>
 </div>
+
+<!-- PageSize Auswahl -->
+<div class="d-flex align-items-center gap-2 mb-3">
+    <span class="fw-bold text-muted small">Einträge pro Seite:</span>
+    @foreach (var size in new[] { 10, 30, 50 })
+    {
+        <a asp-action="Index"
+               asp-route-pageSize="@size"
+               asp-route-page="1"
+               class="btn btn-sm @(ViewBag.PageSize == size ? "btn-success" : "btn-outline-secondary")">
+            @size
+        </a>
+    }
+    <span class="text-muted small ms-2">
+        (@ViewBag.TotalCount Einträge gesamt)
+    </span>
+</div>
+
 
 <div class="card shadow-sm">
     <div class="card-body p-0">
@@ -35,20 +53,30 @@
                         <td>
                             @if (item.Enddatum != null && item.Enddatum < DateTime.Now)
                             {
-                                <span class="badge bg-success">Beendet</span>
+                                <span class="badge badge-outline-success">
+                                    <i class="bi bi-flag me-1"></i>Beendet
+                                </span>
                             }
                             else
                             {
-                                <span class="badge bg-warning text-dark">Aktiv</span>
+                                <span class="badge badge-outline-warning">
+                                    <i class="bi bi-play-circle me-1"></i>Aktiv
+                                </span>
                             }
                         </td>
                         <td class="text-end">
                             <a asp-action="Details" asp-route-id="@item.Id"
-                               class="btn btn-sm btn-outline-secondary">🔍</a>
+                                   class="btn btn-sm btn-outline-secondary" title="Details">
+                                <i class="bi bi-eye"></i>
+                            </a>
                             <a asp-action="Edit" asp-route-id="@item.Id"
-                               class="btn btn-sm btn-outline-primary">✏️</a>
+                                   class="btn btn-sm btn-outline-primary" title="Bearbeiten">
+                                <i class="bi bi-pencil"></i>
+                            </a>
                             <a asp-action="Delete" asp-route-id="@item.Id"
-                               class="btn btn-sm btn-outline-danger">🗑️</a>
+                                   class="btn btn-sm btn-outline-danger" title="Löschen">
+                                <i class="bi bi-trash"></i>
+                            </a>
                         </td>
                     </tr>
                 }
@@ -57,7 +85,41 @@
     </div>
 </div>
 
+<!-- Pager -->
+@if ((int)ViewBag.TotalPages > 1)
+{
+    <nav class="mt-3">
+        <ul class="pagination pagination-sm mb-0">
+            <li class="page-item @((int)ViewBag.Page <= 1 ? "disabled" : "")">
+                <a class="page-link" asp-action="Index"
+                       asp-route-pageSize="@ViewBag.PageSize"
+                       asp-route-page="@((int)ViewBag.Page - 1)">
+                    <i class="bi bi-chevron-left"></i>
+                </a>
+            </li>
+            @for (int i = 1; i <= (int)ViewBag.TotalPages; i++)
+            {
+                <li class="page-item @((int)ViewBag.Page == i ? "active" : "")">
+                    <a class="page-link" asp-action="Index"
+                       asp-route-pageSize="@ViewBag.PageSize"
+                       asp-route-page="@i">@i</a>
+                </li>
+            }
+            <li class="page-item @((int)ViewBag.Page >= (int)ViewBag.TotalPages ? "disabled" : "")">
+                <a class="page-link" asp-action="Index"
+                       asp-route-pageSize="@ViewBag.PageSize"
+                       asp-route-page="@((int)ViewBag.Page + 1)">
+                    <i class="bi bi-chevron-right"></i>
+                </a>
+            </li>
+        </ul>
+    </nav>
+}
+
+
 <div class="mt-3">
     <a asp-area="Admin" asp-controller="Admin" asp-action="Index"
-       class="btn btn-outline-secondary btn-sm">← Zurück zum Admin-Bereich</a>
+           class="btn btn-outline-secondary btn-sm">
+        <i class="bi bi-arrow-left me-1"></i>Zurück zum Admin-Bereich
+    </a>
 </div>

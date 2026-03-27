@@ -21,21 +21,56 @@ namespace Ticket_System.Controllers
             _userManager = userManager;
         }
 
-        // GET: /Tickets → Liste aller Tickets
-        public async Task<IActionResult> Index()
+        // GET: /Tickets
+        public async Task<IActionResult> Index(int? projektId, string? zugewiesenerBenutzerId,
+                                        string? erstellerId, int pageSize = 10, int page = 1)
         {
-            // Tickets laden mit zugehörigen Projekten und Benutzern
-            // .Include() = Navigationseigenschaften laden (JOIN in SQL)
-            var tickets = await _context.Tickets
+            var query = _context.Tickets
                 .Include(t => t.Projekt)
                 .Include(t => t.Ersteller)
                 .Include(t => t.ZugewiesenerBenutzer)
-                .OrderBy(t => t.Projekt.Titel)           // erst nach Projekt sortieren
-                .ThenByDescending(t => t.ErstelltAm)     // dann nach Datum absteigend
+                .AsQueryable();
+
+            if (projektId.HasValue)
+                query = query.Where(t => t.ProjektId == projektId.Value);
+
+            if (zugewiesenerBenutzerId == "none")
+                query = query.Where(t => t.ZugewiesenerBenutzerId == null);
+            else if (!string.IsNullOrEmpty(zugewiesenerBenutzerId))
+                query = query.Where(t => t.ZugewiesenerBenutzerId == zugewiesenerBenutzerId);
+
+            if (!string.IsNullOrEmpty(erstellerId))
+                query = query.Where(t => t.ErstellerId == erstellerId);
+
+            query = query
+                .OrderBy(t => t.Projekt.Titel)
+                .ThenByDescending(t => t.ErstelltAm);
+
+            // Pagination
+            int totalCount = await query.CountAsync();
+            var tickets = await query
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
                 .ToListAsync();
 
-            return View(tickets);
+            ViewBag.Projekte = new SelectList(_context.Projects.ToList(), "Id", "Titel", projektId);
+            ViewBag.Benutzer = new SelectList(_userManager.Users.ToList(), "Id", "UserName");
+
+            var model = new TicketFilterDto
+            {
+                ProjektId = projektId,
+                ZugewiesenerBenutzerId = zugewiesenerBenutzerId,
+                ErstellerId = erstellerId,
+                PageSize = pageSize,
+                Page = page,
+                TotalCount = totalCount,
+                Tickets = tickets
+            };
+
+            return View(model);
         }
+
+
 
         // GET: /Tickets/Details/5 → Detailseite eines Tickets
         public async Task<IActionResult> Details(int? id)
@@ -47,6 +82,8 @@ namespace Ticket_System.Controllers
                 .Include(t => t.Ersteller)
                 .Include(t => t.ZugewiesenerBenutzer)
                 .Include(t => t.GeschlossenVon)
+                .Include(t => t.Comments)
+                    .ThenInclude(c => c.Ersteller) 
                 .FirstOrDefaultAsync(t => t.Id == id);
 
             if (ticket == null) return NotFound();
@@ -197,6 +234,86 @@ namespace Ticket_System.Controllers
             TempData["Success"] = "🔒 Ticket wurde erfolgreich geschlossen!";
             return RedirectToAction(nameof(Details), new { id = ticket.Id });
         }
+
+
+        // POST: /Tickets/AddComment
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AddComment(int ticketId, string inhalt)
+        {
+            if (string.IsNullOrWhiteSpace(inhalt))
+            {
+                TempData["Error"] = "Kommentar darf nicht leer sein.";
+                return RedirectToAction(nameof(Details), new { id = ticketId });
+            }
+
+            var ticket = await _context.Tickets.FindAsync(ticketId);
+            if (ticket == null) return NotFound();
+
+            var user = await _userManager.GetUserAsync(User);
+
+            var comment = new Comment
+            {
+                TicketId = ticketId,
+                Inhalt = inhalt.Trim(),
+                ErstellerId = user.Id,
+                Erstellzeitpunkt = DateTime.Now
+            };
+
+            _context.Comments.Add(comment);
+            await _context.SaveChangesAsync();
+
+            TempData["Success"] = "Kommentar wurde hinzugefuegt.";
+            return RedirectToAction(nameof(Details), new { id = ticketId });
+        }
+
+
+        // GET: /Tickets/Delete/5 → Bestätigungsseite anzeigen
+        public async Task<IActionResult> Delete(int? id)
+        {
+            if (id == null) return NotFound();
+
+            var ticket = await _context.Tickets
+                .Include(t => t.Projekt)
+                .Include(t => t.ZugewiesenerBenutzer)
+                .FirstOrDefaultAsync(t => t.Id == id);
+
+            if (ticket == null) return NotFound();
+
+            // Zugriffsprüfung: nur Admin oder Ersteller darf löschen
+            var aktuellerBenutzer = await _userManager.GetUserAsync(User);
+            bool istAdmin = await _userManager.IsInRoleAsync(aktuellerBenutzer, "Admin");
+            bool istErsteller = ticket.ErstellerId == aktuellerBenutzer.Id;
+
+            if (!istAdmin && !istErsteller)
+                return RedirectToAction("AccessDenied", "Account");
+
+            return View(ticket);
+        }
+
+        // POST: /Tickets/Delete/5 → Ticket wirklich löschen
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteConfirmed(int id)
+        {
+            var ticket = await _context.Tickets.FindAsync(id);
+            if (ticket == null) return NotFound();
+
+            // Zugriffsprüfung
+            var aktuellerBenutzer = await _userManager.GetUserAsync(User);
+            bool istAdmin = await _userManager.IsInRoleAsync(aktuellerBenutzer, "Admin");
+            bool istErsteller = ticket.ErstellerId == aktuellerBenutzer.Id;
+
+            if (!istAdmin && !istErsteller)
+                return RedirectToAction("AccessDenied", "Account");
+
+            _context.Tickets.Remove(ticket);
+            await _context.SaveChangesAsync();
+            TempData["Success"] = "Ticket wurde erfolgreich gelöscht!";
+            return RedirectToAction(nameof(Index));
+        }
+
+
 
     }
 }
