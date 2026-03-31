@@ -1,4 +1,5 @@
 ﻿@model Ticket
+@using Ticket_System.Models
 
 @{
     ViewData["Title"] = "Ticket Details";
@@ -75,6 +76,95 @@
         </div>
     }
 </div>
+
+@* Blockierende Tickets *@
+<div class="card mt-4">
+    <div class="card-header d-flex align-items-center justify-content-between">
+        <span>
+            <i class="bi bi-slash-circle text-danger me-2"></i>
+            <strong>Blockiert durch</strong>
+            @if (Model.WirdBlockiertDurch.Any())
+            {
+                <span class="badge badge-outline-danger ms-2">@Model.WirdBlockiertDurch.Count</span>
+            }
+        </span>
+    </div>
+    <div class="card-body">
+
+        @* Bestehende Blocker *@
+        @if (!Model.WirdBlockiertDurch.Any())
+        {
+            <p class="text-muted mb-3">
+                <i class="bi bi-check-circle me-1"></i>
+                Keine Abhängigkeiten — dieses Ticket ist nicht blockiert.
+            </p>
+        }
+        else
+        {
+            <ul class="list-group list-group-flush mb-3">
+                @foreach (var abh in Model.WirdBlockiertDurch)
+                {
+                    var blocker = abh.BlockierendesTicket;
+                    var geloest = blocker.Status == "Gelöst";
+                    <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                        <div class="d-flex align-items-center gap-2">
+                            <i class="bi @(geloest ? "bi-check-circle-fill text-success" : "bi-exclamation-circle-fill text-warning")"></i>
+                            <a asp-action="Details" asp-route-id="@blocker.Id"
+                                   class="text-decoration-none fw-medium">
+                                #@blocker.Id — @blocker.Titel
+                            </a>
+                            <span class="badge @(geloest ? "bg-success" : "bg-warning text-dark") ms-1">
+                                @blocker.Status
+                            </span>
+                        </div>
+                        <form asp-action="BlockierungEntfernen" method="post" class="d-inline">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="ticketId" value="@Model.Id" />
+                            <input type="hidden" name="blockerTicketId" value="@blocker.Id" />
+                            <button type="submit" class="btn btn-sm btn-outline-danger"
+                                    title="Blockierung entfernen">
+                                <i class="bi bi-x"></i>
+                            </button>
+                        </form>
+                    </li>
+                }
+            </ul>
+        }
+
+        @* Blocker hinzufügen *@
+        <form asp-action="BlockierungHinzufuegen" method="post" class="d-flex gap-2">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="ticketId" value="@Model.Id" />
+            <select name="blockerTicketId" class="form-select form-select-sm">
+                <option value="">— Ticket auswählen —</option>
+                @foreach (var t in (List<Ticket>)ViewBag.AlleTickets)
+                {
+                    var bereitsBlocker = Model.WirdBlockiertDurch
+                        .Any(a => a.BlockierendesTicketId == t.Id);
+                    if (!bereitsBlocker)
+                    {
+                        <option value="@t.Id">#@t.Id — @t.Titel (@t.Status)</option>
+                    }
+                }
+            </select>
+            <button type="submit" class="btn btn-sm btn-outline-primary text-nowrap">
+                <i class="bi bi-plus me-1"></i>Blocker hinzufügen
+            </button>
+        </form>
+    </div>
+</div>
+
+@* Status-Warnung wenn Ticket blockiert ist *@
+@if (Model.WirdBlockiertDurch.Any(a => a.BlockierendesTicket.Status != "Gelöst"))
+{
+    <div class="alert alert-warning mt-3 d-flex align-items-center gap-2">
+        <i class="bi bi-lock-fill"></i>
+        <span>
+            Dieses Ticket kann <strong>nicht gelöst</strong> werden,
+            bis alle blockierenden Tickets abgeschlossen sind.
+        </span>
+    </div>
+}
 
 <hr class="my-4" />
 

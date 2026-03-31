@@ -16,6 +16,8 @@ namespace Ticket_System.Data
 
         public DbSet<Comment> Comments { get; set; }
 
+        public DbSet<TicketAbhaengigkeit> TicketAbhaengigkeiten { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -26,6 +28,23 @@ namespace Ticket_System.Data
                 .WithMany(t => t.Comments)
                 .HasForeignKey(c => c.TicketId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<TicketAbhaengigkeit>(entity =>
+            {
+                entity.HasKey(e => new { e.BlockiertesTicketId, e.BlockierendesTicketId });
+
+                entity.HasOne(e => e.BlockiertesTicket)
+                      .WithMany(t => t.WirdBlockiertDurch)
+                      .HasForeignKey(e => e.BlockiertesTicketId)
+                      .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(e => e.BlockierendesTicket)
+                      .WithMany(t => t.BlockiertAndere)
+                      .HasForeignKey(e => e.BlockierendesTicketId)
+                      .OnDelete(DeleteBehavior.Restrict);
+            });
         }
+
+
     }
 }

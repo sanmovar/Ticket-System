@@ -16,6 +16,9 @@ namespace Ticket_System.Models
         [Required(ErrorMessage = "Die Beschreibung ist erforderlich.")]
         public string? Beschreibung { get; set; }
 
+        [Required]
+        public string Status { get; set; } = "Offen";
+
         [Required(ErrorMessage = "Projekt ist erforderlich.")]
         public int ProjektId { get; set; }
 
@@ -46,6 +49,8 @@ namespace Ticket_System.Models
 
         public ICollection<Comment> Comments { get; set; } = new List<Comment>();
 
+        public ICollection<TicketAbhaengigkeit> WirdBlockiertDurch { get; set; } = new List<TicketAbhaengigkeit>();
 
+        public ICollection<TicketAbhaengigkeit> BlockiertAndere { get; set; } = new List<TicketAbhaengigkeit>();
     }
 }
