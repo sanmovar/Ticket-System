@@ -14,8 +14,6 @@
     </a>
 </div>
 
-@using System.Security.Claims
-
 @{
     var hatAktiveFilter = Model.ProjektId.HasValue ||
                           !string.IsNullOrEmpty(Model.ZugewiesenerBenutzerId) ||
@@ -31,7 +29,6 @@
             <i class="bi bi-funnel-fill me-1"></i>Aktive Filter:
         </small>
 
-        @* ── Projekt-Badge ── *@
         @if (Model.ProjektId.HasValue)
         {
             var projektName = ((SelectList)ViewBag.Projekte)
@@ -47,7 +44,6 @@
             </a>
         }
 
-        @* ── Zugewiesener Benutzer-Badge ── *@
         @if (!string.IsNullOrEmpty(Model.ZugewiesenerBenutzerId))
         {
             var anzeigeName = Model.ZugewiesenerBenutzerId == "none"
@@ -65,7 +61,6 @@
             </a>
         }
 
-        @* ── Ersteller-Badge ── *@
         @if (!string.IsNullOrEmpty(Model.ErstellerId))
         {
             var erstellerName = ((SelectList)ViewBag.Benutzer)
@@ -81,7 +76,6 @@
             </a>
         }
 
-        @* ── Alle löschen ── *@
         <a asp-action="Index" asp-route-pageSize="@Model.PageSize"
                class="btn btn-sm btn-outline-secondary ms-1 py-0">
             <i class="bi bi-x-circle me-1"></i>Alle löschen
@@ -96,25 +90,30 @@
         <i class="bi bi-funnel me-2"></i>Filter
     </div>
     <div class="card-body">
-        <form method="get" asp-action="Index">
+        <form method="get" asp-action="Index" id="filterForm">
             <div class="row g-3 align-items-end">
 
-                <!-- 6.1 Filter nach Projekt -->
+                <!-- Filter nach Projekt -->
                 <div class="col-md-4">
                     <label class="form-label fw-bold">
                         <i class="bi bi-folder me-1"></i>Projekt
                     </label>
-                    <select name="projektId" class="form-select" asp-items="ViewBag.Projekte">
+                    <select name="projektId" class="form-select"
+                            asp-items="ViewBag.Projekte"
+                            onchange="this.form.submit()">
+                        @* ✅ Auto-Submit *@
                         <option value="">— Alle Projekte —</option>
                     </select>
                 </div>
 
-                <!-- 6.2 Filter nach zugeordnetem Benutzer -->
+                <!-- Filter nach zugeordnetem Benutzer -->
                 <div class="col-md-4">
                     <label class="form-label fw-bold">
                         <i class="bi bi-person-check me-1"></i>Zugeordnet an
                     </label>
-                    <select name="zugewiesenerBenutzerId" class="form-select">
+                    <select name="zugewiesenerBenutzerId" class="form-select"
+                            onchange="this.form.submit()">
+                        @* ✅ Auto-Submit *@
                         <option value="">— Alle Benutzer —</option>
                         <option value="none" selected="@(Model.ZugewiesenerBenutzerId == "none" ? "selected" : null)">
                             — Nicht zugeordnet —
@@ -129,12 +128,14 @@
                     </select>
                 </div>
 
-                <!-- 6.3 Filter nach Ersteller -->
+                <!-- Filter nach Ersteller -->
                 <div class="col-md-4">
                     <label class="form-label fw-bold">
                         <i class="bi bi-person me-1"></i>Ersteller
                     </label>
-                    <select name="erstellerId" class="form-select">
+                    <select name="erstellerId" class="form-select"
+                            onchange="this.form.submit()">
+                        @* ✅ Auto-Submit *@
                         <option value="">— Alle Benutzer —</option>
                         @foreach (var item in ViewBag.Benutzer as SelectList)
                         {
@@ -145,7 +146,6 @@
                         }
                     </select>
                 </div>
-
 
             </div>
             <div class="d-flex gap-2 mt-3">
@@ -159,7 +159,6 @@
 
                 @if (meineTicketsAktiv)
                 {
-                    <!-- Aktiver Zustand — klicken hebt Filter auf -->
                     <a asp-action="Index"
                            class="btn btn-outline-info btn-sm">
                         <i class="bi bi-person-check-fill me-1"></i>Meine Tickets
@@ -193,7 +192,7 @@
                asp-route-erstellerId="@Model.ErstellerId"
                asp-route-pageSize="@size"
                asp-route-page="1"
-               class="btn btn-sm @(Model.PageSize == size ? "btn-primary" : "btn-outline-secondary")">
+               class="btn btn-sm @(Model.PageSize == size ? "btn-outline-primary" : "btn-outline-secondary")">
             @size
         </a>
     }
@@ -201,7 +200,6 @@
         (@Model.TotalCount Einträge gesamt)
     </span>
 </div>
-
 
 <!-- Ticketliste -->
 <div class="card shadow-sm">
@@ -241,11 +239,11 @@
                         </td>
                         <td class="text-end">
                             <a asp-action="Details" asp-route-id="@ticket.Id"
-                               class="btn btn-sm btn-outline-secondary" title="Details">
+                                   class="btn btn-sm btn-outline-secondary" title="Details">
                                 <i class="bi bi-eye"></i>
                             </a>
                             <a asp-action="Edit" asp-route-id="@ticket.Id"
-                               class="btn btn-sm btn-outline-primary" title="Bearbeiten">
+                                   class="btn btn-sm btn-outline-primary" title="Bearbeiten">
                                 <i class="bi bi-pencil"></i>
                             </a>
                             <button type="button"
@@ -313,15 +311,14 @@
     </nav>
 }
 
-
 <div class="mt-3">
     <a asp-controller="Home" asp-action="Index"
-       class="btn btn-outline-secondary btn-sm">
+           class="btn btn-outline-secondary btn-sm">
         <i class="bi bi-arrow-left me-1"></i>Zurück zur Startseite
     </a>
 </div>
 
-                       <!-- Bestätigungs-Modal -->
+<!-- Bestätigungs-Modal -->
 <div class="modal fade" id="deleteModal" tabindex="-1"
      aria-labelledby="deleteModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">

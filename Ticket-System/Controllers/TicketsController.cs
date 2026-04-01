@@ -84,7 +84,7 @@ namespace Ticket_System.Controllers
             if (ticket == null) return NotFound();
 
             ViewBag.AlleTickets = await _context.Tickets
-                .Where(t => t.Id != id)
+                .Where(t => t.Id != id && t.ProjektId == ticket.ProjektId)
                 .OrderBy(t => t.Titel)
                 .ToListAsync();
 
