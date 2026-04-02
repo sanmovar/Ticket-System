@@ -3,6 +3,10 @@
 
 @{
     ViewData["Title"] = "Ticket Details";
+
+    // Basierend auf Status
+    bool istAbgeschlossen = Model.Status == TicketStatus.Geloest
+                     || Model.Status == TicketStatus.Abgebrochen;
 }
 
 <div class="d-flex justify-content-between align-items-center mb-4">
@@ -41,33 +45,30 @@
 
             <dt class="col-sm-3">Status</dt>
             <dd class="col-sm-9">
+                @* Basiert auf TicketStatus *@
+                @await Html.PartialAsync("_TicketStatusBadge", Model.Status)
+
+                @* Metadaten wann/von wem abgeschlossen – nur wenn GeschlossenAm gesetzt *@
                 @if (Model.GeschlossenAm != null)
                 {
-                    <span class="badge badge-outline-success">
-                        <i class="bi bi-check-circle me-1"></i>Geschlossen
-                    </span>
                     <small class="text-muted ms-2">
                         von @Model.GeschlossenVon?.UserName
                         am @Model.GeschlossenAm?.ToString("dd.MM.yyyy HH:mm")
                     </small>
                 }
-                else
-                {
-                    <span class="badge badge-outline-warning">
-                        <i class="bi bi-unlock me-1"></i>Offen
-                    </span>
-                }
             </dd>
         </dl>
     </div>
 
-    @if (Model.GeschlossenAm == null)
+    @* ✅ Buttons nur anzeigen wenn Ticket noch nicht abgeschlossen *@
+    @if (!istAbgeschlossen)
     {
         <div class="card-footer d-flex gap-2">
             <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-outline-primary btn-sm">
                 <i class="bi bi-pencil me-1"></i>Bearbeiten
             </a>
             <form asp-action="Close" asp-route-id="@Model.Id" method="post" class="d-inline">
+                @Html.AntiForgeryToken()
                 <button type="submit" class="btn btn-outline-danger btn-sm"
                         onclick="return confirm('Ticket wirklich schließen?')">
                     <i class="bi bi-lock me-1"></i>Ticket schließen
@@ -91,7 +92,6 @@
     </div>
     <div class="card-body">
 
-        @* Bestehende Blocker *@
         @if (!Model.WirdBlockiertDurch.Any())
         {
             <p class="text-muted mb-3">
@@ -105,7 +105,7 @@
                 @foreach (var abh in Model.WirdBlockiertDurch)
                 {
                     var blocker = abh.BlockierendesTicket;
-                    var geloest = blocker.Status == "Gelöst";
+                    var geloest = blocker.Status == TicketStatus.Geloest;
                     <li class="list-group-item d-flex justify-content-between align-items-center px-0">
                         <div class="d-flex align-items-center gap-2">
                             <i class="bi @(geloest ? "bi-check-circle-fill text-success" : "bi-exclamation-circle-fill text-warning")"></i>
@@ -131,31 +131,34 @@
             </ul>
         }
 
-        @* Blocker hinzufügen *@
-        <form asp-action="BlockierungHinzufuegen" method="post" class="d-flex gap-2">
-            @Html.AntiForgeryToken()
-            <input type="hidden" name="ticketId" value="@Model.Id" />
-            <select name="blockerTicketId" class="form-select form-select-sm">
-                <option value="">— Ticket auswählen —</option>
-                @foreach (var t in (List<Ticket>)ViewBag.AlleTickets)
-                {
-                    var bereitsBlocker = Model.WirdBlockiertDurch
-                        .Any(a => a.BlockierendesTicketId == t.Id);
-                    if (!bereitsBlocker)
+        @* Blocker hinzufügen – nur bei offenem Ticket *@
+        @if (!istAbgeschlossen)
+        {
+            <form asp-action="BlockierungHinzufuegen" method="post" class="d-flex gap-2">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="ticketId" value="@Model.Id" />
+                <select name="blockerTicketId" class="form-select form-select-sm">
+                    <option value="0">— Ticket auswählen —</option>
+                    @foreach (var t in ViewBag.AlleTickets as List<Ticket> ?? new List<Ticket>())
                     {
-                        <option value="@t.Id">#@t.Id — @t.Titel (@t.Status)</option>
+                        var bereitsBlocker = Model.WirdBlockiertDurch
+                            .Any(a => a.BlockierendesTicketId == t.Id);
+                        if (!bereitsBlocker)
+                        {
+                            <option value="@t.Id">#@t.Id — @t.Titel (@t.Status)</option>
+                        }
                     }
-                }
-            </select>
-            <button type="submit" class="btn btn-sm btn-outline-primary text-nowrap">
-                <i class="bi bi-plus me-1"></i>Blocker hinzufügen
-            </button>
-        </form>
+                </select>
+                <button type="submit" class="btn btn-sm btn-outline-primary text-nowrap">
+                    <i class="bi bi-plus me-1"></i>Blocker hinzufügen
+                </button>
+            </form>
+        }
     </div>
 </div>
 
 @* Status-Warnung wenn Ticket blockiert ist *@
-@if (Model.WirdBlockiertDurch.Any(a => a.BlockierendesTicket.Status != "Gelöst"))
+@if (Model.WirdBlockiertDurch.Any(a => a.BlockierendesTicket.Status != TicketStatus.Geloest))
 {
     <div class="alert alert-warning mt-3 d-flex align-items-center gap-2">
         <i class="bi bi-lock-fill"></i>
@@ -173,7 +176,7 @@
 @if (Model.Comments != null && Model.Comments.Any())
 {
     <div class="list-group mb-3">
-        @foreach (var c in Model.Comments.OrderByDescending(c => c.Erstellzeitpunkt))
+        @foreach (var c in Model.Comments)
         {
             <div class="list-group-item">
                 <div class="d-flex justify-content-between">
@@ -182,9 +185,7 @@
                         <i class="bi bi-clock me-1"></i>@c.Erstellzeitpunkt.ToString("dd.MM.yyyy HH:mm")
                     </small>
                 </div>
-                <div class="mt-2">
-                    @c.Inhalt
-                </div>
+                <div class="mt-2">@c.Inhalt</div>
             </div>
         }
     </div>
@@ -194,7 +195,7 @@ else
     <p class="text-muted"><i class="bi bi-info-circle me-1"></i>Noch keine Kommentare vorhanden.</p>
 }
 
-@if (Model.GeschlossenAm == null)
+@if (!istAbgeschlossen)
 {
     <div class="card shadow-sm mt-3">
         <div class="card-header fw-bold">
@@ -202,6 +203,7 @@ else
         </div>
         <div class="card-body">
             <form asp-action="AddComment" method="post">
+                @Html.AntiForgeryToken()
                 <input type="hidden" name="ticketId" value="@Model.Id" />
                 <div class="mb-3">
                     <textarea name="inhalt" class="form-control" rows="3"

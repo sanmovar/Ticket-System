@@ -10,6 +10,7 @@
 </div>
 
 <div class="row g-4 justify-content-center">
+
     <div class="col-md-4">
         <div class="card shadow-sm h-100">
             <div class="card-header card-header-outline-success fw-bold">
@@ -24,4 +25,20 @@
             </div>
         </div>
     </div>
+
+    <div class="col-md-4">
+        <div class="card shadow-sm h-100">
+            <div class="card-header card-header-outline-danger fw-bold">
+                <i class="bi bi-people me-2"></i>Benutzer
+            </div>
+            <div class="card-body">
+                <p class="card-text text-muted">Benutzer ansehen und Rollen zuweisen.</p>
+                <a asp-controller="Users" asp-action="Index" asp-area="Admin"
+                       class="btn btn-outline-danger w-100">
+                    <i class="bi bi-arrow-right-circle me-2"></i>Benutzer verwalten
+                </a>
+            </div>
+        </div>
+    </div>
+
 </div>

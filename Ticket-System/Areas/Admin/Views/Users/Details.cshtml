@@ -1,0 +1,74 @@
+﻿@model Microsoft.AspNetCore.Identity.IdentityUser
+
+@{
+    ViewData["Title"] = "Benutzer Details";
+    var rollen = ViewBag.Rollen as IList<string> ?? new List<string>();
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="fw-bold">
+        <i class="bi bi-person-circle me-2"></i>Benutzer Details
+    </h2>
+    <a asp-area="Admin" asp-controller="Users" asp-action="Index"
+           class="btn btn-outline-secondary btn-sm">
+        <i class="bi bi-arrow-left me-1"></i>Zurück
+    </a>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-header fw-bold">
+        <i class="bi bi-person me-2"></i>@Model.UserName
+    </div>
+    <div class="card-body">
+        <dl class="row mb-0">
+            <dt class="col-sm-3">Benutzername</dt>
+            <dd class="col-sm-9">@Model.UserName</dd>
+
+            <dt class="col-sm-3">E-Mail</dt>
+            <dd class="col-sm-9">@Model.Email</dd>
+
+            <dt class="col-sm-3">E-Mail bestätigt</dt>
+            <dd class="col-sm-9">
+                @if (Model.EmailConfirmed)
+                {
+                    <span class="badge badge-outline-success">
+                        <i class="bi bi-check-circle me-1"></i>Ja
+                    </span>
+                }
+                else
+                {
+                    <span class="badge badge-outline-warning">
+                        <i class="bi bi-x-circle me-1"></i>Nein
+                    </span>
+                }
+            </dd>
+
+            <dt class="col-sm-3">Rollen</dt>
+            <dd class="col-sm-9">
+                @if (rollen.Any())
+                {
+                    @foreach (var rolle in rollen)
+                    {
+                        <span class="badge me-1
+                            @(rolle == "Admin" ? "badge-outline-danger" :
+                                                            rolle == "Developer" ? "badge-outline-primary" :
+                                                            "badge-outline-success")">
+                            @rolle
+                        </span>
+                    }
+                }
+                else
+                {
+                    <span class="text-muted fst-italic">Keine Rolle zugewiesen</span>
+                }
+            </dd>
+        </dl>
+    </div>
+    <div class="card-footer d-flex gap-2">
+        <a asp-area="Admin" asp-controller="Users"
+               asp-action="Edit" asp-route-id="@Model.Id"
+               class="btn btn-outline-primary btn-sm">
+            <i class="bi bi-pencil me-1"></i>Bearbeiten
+        </a>
+    </div>
+</div>

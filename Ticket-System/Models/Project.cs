@@ -4,7 +4,6 @@ namespace Ticket_System.Models
 {
     public class Project
     {
-        // Primärschlüssel
         public int Id { get; set; }
 
         [Required(ErrorMessage = "Titel ist erforderlich")]
@@ -20,5 +19,7 @@ namespace Ticket_System.Models
 
         [DataType(DataType.Date)]
         public DateTime? Enddatum { get; set; }
+
+        public ICollection<Ticket> Tickets { get; set; } = new List<Ticket>();
     }
 }

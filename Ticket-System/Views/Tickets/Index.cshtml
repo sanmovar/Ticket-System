@@ -17,7 +17,8 @@
 @{
     var hatAktiveFilter = Model.ProjektId.HasValue ||
                           !string.IsNullOrEmpty(Model.ZugewiesenerBenutzerId) ||
-                          !string.IsNullOrEmpty(Model.ErstellerId);
+                          !string.IsNullOrEmpty(Model.ErstellerId) ||
+                          !string.IsNullOrEmpty(Model.Status); // ✅ NEU
 }
 
 @if (hatAktiveFilter)
@@ -37,6 +38,7 @@
             <a asp-action="Index"
                    asp-route-zugewiesenerBenutzerId="@Model.ZugewiesenerBenutzerId"
                    asp-route-erstellerId="@Model.ErstellerId"
+                   asp-route-status="@Model.Status"
                    asp-route-pageSize="@Model.PageSize"
                    class="badge text-decoration-none filter-badge">
                 <i class="bi bi-folder2 me-1"></i>@projektName
@@ -54,6 +56,7 @@
             <a asp-action="Index"
                    asp-route-projektId="@Model.ProjektId"
                    asp-route-erstellerId="@Model.ErstellerId"
+                   asp-route-status="@Model.Status"
                    asp-route-pageSize="@Model.PageSize"
                    class="badge text-decoration-none filter-badge">
                 <i class="bi bi-person-check me-1"></i>Zugewiesen: @anzeigeName
@@ -69,9 +72,24 @@
             <a asp-action="Index"
                    asp-route-projektId="@Model.ProjektId"
                    asp-route-zugewiesenerBenutzerId="@Model.ZugewiesenerBenutzerId"
+                   asp-route-status="@Model.Status"
                    asp-route-pageSize="@Model.PageSize"
                    class="badge text-decoration-none filter-badge">
                 <i class="bi bi-person-plus me-1"></i>Ersteller: @erstellerName
+                <i class="bi bi-x ms-2 opacity-75"></i>
+            </a>
+        }
+
+        @* ✅ NEU: Status-Badge *@
+        @if (!string.IsNullOrEmpty(Model.Status))
+        {
+            <a asp-action="Index"
+                   asp-route-projektId="@Model.ProjektId"
+                   asp-route-zugewiesenerBenutzerId="@Model.ZugewiesenerBenutzerId"
+                   asp-route-erstellerId="@Model.ErstellerId"
+                   asp-route-pageSize="@Model.PageSize"
+                   class="badge text-decoration-none filter-badge">
+                <i class="bi bi-flag me-1"></i>Status: @Model.Status
                 <i class="bi bi-x ms-2 opacity-75"></i>
             </a>
         }
@@ -80,7 +98,6 @@
                class="btn btn-sm btn-outline-secondary ms-1 py-0">
             <i class="bi bi-x-circle me-1"></i>Alle löschen
         </a>
-
     </div>
 }
 
@@ -93,27 +110,23 @@
         <form method="get" asp-action="Index" id="filterForm">
             <div class="row g-3 align-items-end">
 
-                <!-- Filter nach Projekt -->
-                <div class="col-md-4">
+                <div class="col-md-3">
                     <label class="form-label fw-bold">
                         <i class="bi bi-folder me-1"></i>Projekt
                     </label>
                     <select name="projektId" class="form-select"
                             asp-items="ViewBag.Projekte"
                             onchange="this.form.submit()">
-                        @* ✅ Auto-Submit *@
                         <option value="">— Alle Projekte —</option>
                     </select>
                 </div>
 
-                <!-- Filter nach zugeordnetem Benutzer -->
-                <div class="col-md-4">
+                <div class="col-md-3">
                     <label class="form-label fw-bold">
                         <i class="bi bi-person-check me-1"></i>Zugeordnet an
                     </label>
                     <select name="zugewiesenerBenutzerId" class="form-select"
                             onchange="this.form.submit()">
-                        @* ✅ Auto-Submit *@
                         <option value="">— Alle Benutzer —</option>
                         <option value="none" selected="@(Model.ZugewiesenerBenutzerId == "none" ? "selected" : null)">
                             — Nicht zugeordnet —
@@ -128,14 +141,12 @@
                     </select>
                 </div>
 
-                <!-- Filter nach Ersteller -->
-                <div class="col-md-4">
+                <div class="col-md-3">
                     <label class="form-label fw-bold">
                         <i class="bi bi-person me-1"></i>Ersteller
                     </label>
                     <select name="erstellerId" class="form-select"
                             onchange="this.form.submit()">
-                        @* ✅ Auto-Submit *@
                         <option value="">— Alle Benutzer —</option>
                         @foreach (var item in ViewBag.Benutzer as SelectList)
                         {
@@ -144,6 +155,17 @@
                                 @item.Text
                             </option>
                         }
+                    </select>
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label fw-bold">
+                        <i class="bi bi-flag me-1"></i>Status
+                    </label>
+                    <select name="status" class="form-select"
+                            asp-items="ViewBag.StatusListe"
+                            onchange="this.form.submit()">
+                        <option value="">— Alle Status —</option>
                     </select>
                 </div>
 
@@ -156,11 +178,9 @@
                     var aktuelleUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
                     var meineTicketsAktiv = Context.Request.Query["zugewiesenerBenutzerId"] == aktuelleUserId;
                 }
-
                 @if (meineTicketsAktiv)
                 {
-                    <a asp-action="Index"
-                           class="btn btn-outline-info btn-sm">
+                    <a asp-action="Index" class="btn btn-outline-info btn-sm">
                         <i class="bi bi-person-check-fill me-1"></i>Meine Tickets
                         <i class="bi bi-x ms-1"></i>
                     </a>
@@ -190,6 +210,7 @@
                asp-route-projektId="@Model.ProjektId"
                asp-route-zugewiesenerBenutzerId="@Model.ZugewiesenerBenutzerId"
                asp-route-erstellerId="@Model.ErstellerId"
+               asp-route-status="@Model.Status"
                asp-route-pageSize="@size"
                asp-route-page="1"
                class="btn btn-sm @(Model.PageSize == size ? "btn-outline-primary" : "btn-outline-secondary")">
@@ -224,18 +245,7 @@
                         <td>@ticket.ErstelltAm.ToString("dd.MM.yyyy")</td>
                         <td>@(ticket.ZugewiesenerBenutzer?.UserName ?? "-")</td>
                         <td>
-                            @if (ticket.GeschlossenAm != null)
-                            {
-                                <span class="badge badge-outline-success">
-                                    <i class="bi bi-check-circle me-1"></i>Geschlossen
-                                </span>
-                            }
-                            else
-                            {
-                                <span class="badge badge-outline-warning">
-                                    <i class="bi bi-unlock me-1"></i>Offen
-                                </span>
-                            }
+                            @await Html.PartialAsync("_TicketStatusBadge", ticket.Status)
                         </td>
                         <td class="text-end">
                             <a asp-action="Details" asp-route-id="@ticket.Id"
@@ -281,6 +291,7 @@
                        asp-route-projektId="@Model.ProjektId"
                        asp-route-zugewiesenerBenutzerId="@Model.ZugewiesenerBenutzerId"
                        asp-route-erstellerId="@Model.ErstellerId"
+                       asp-route-status="@Model.Status"
                        asp-route-pageSize="@Model.PageSize"
                        asp-route-page="@(Model.Page - 1)">
                     <i class="bi bi-chevron-left"></i>
@@ -293,6 +304,7 @@
                        asp-route-projektId="@Model.ProjektId"
                        asp-route-zugewiesenerBenutzerId="@Model.ZugewiesenerBenutzerId"
                        asp-route-erstellerId="@Model.ErstellerId"
+                       asp-route-status="@Model.Status"
                        asp-route-pageSize="@Model.PageSize"
                        asp-route-page="@i">@i</a>
                 </li>
@@ -302,6 +314,7 @@
                        asp-route-projektId="@Model.ProjektId"
                        asp-route-zugewiesenerBenutzerId="@Model.ZugewiesenerBenutzerId"
                        asp-route-erstellerId="@Model.ErstellerId"
+                       asp-route-status="@Model.Status"
                        asp-route-pageSize="@Model.PageSize"
                        asp-route-page="@(Model.Page + 1)">
                     <i class="bi bi-chevron-right"></i>

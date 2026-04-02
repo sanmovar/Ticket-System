@@ -20,9 +20,20 @@ namespace Ticket_System.Controllers
             _userManager = userManager;
         }
 
+        //Zentrale Zugriffsprüfung — Admin, Ersteller oder Zugewiesener
+        private async Task<bool> HatZugriff(Ticket ticket)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null) return false;
+            return await _userManager.IsInRoleAsync(user, "Admin")
+                || ticket.ErstellerId == user.Id
+                || ticket.ZugewiesenerBenutzerId == user.Id;
+        }
+
         // GET: /Tickets
         public async Task<IActionResult> Index(int? projektId, string? zugewiesenerBenutzerId,
-                                        string? erstellerId, int pageSize = 10, int page = 1)
+                                string? erstellerId, string? status,
+                                int pageSize = 10, int page = 1)
         {
             var query = _context.Tickets
                 .Include(t => t.Projekt)
@@ -41,6 +52,9 @@ namespace Ticket_System.Controllers
             if (!string.IsNullOrEmpty(erstellerId))
                 query = query.Where(t => t.ErstellerId == erstellerId);
 
+            if (!string.IsNullOrEmpty(status) && TicketStatus.Alle.Contains(status))
+                query = query.Where(t => t.Status == status);
+
             query = query
                 .OrderBy(t => t.Projekt.Titel)
                 .ThenByDescending(t => t.ErstelltAm);
@@ -54,11 +68,16 @@ namespace Ticket_System.Controllers
             ViewBag.Projekte = new SelectList(_context.Projects.ToList(), "Id", "Titel", projektId);
             ViewBag.Benutzer = new SelectList(_userManager.Users.ToList(), "Id", "UserName");
 
+            ViewBag.StatusListe = new SelectList(
+                                        TicketStatus.Alle.Select(s => new SelectListItem { Value = s, Text = s }),
+                                        "Value", "Text", status);
+
             var model = new TicketFilterDto
             {
                 ProjektId = projektId,
                 ZugewiesenerBenutzerId = zugewiesenerBenutzerId,
                 ErstellerId = erstellerId,
+                Status = status,        
                 PageSize = pageSize,
                 Page = page,
                 TotalCount = totalCount,
@@ -82,6 +101,10 @@ namespace Ticket_System.Controllers
                 .FirstOrDefaultAsync(t => t.Id == id);
 
             if (ticket == null) return NotFound();
+
+            ticket.Comments = ticket.Comments
+                .OrderByDescending(c => c.Erstellzeitpunkt)
+                .ToList();
 
             ViewBag.AlleTickets = await _context.Tickets
                 .Where(t => t.Id != id && t.ProjektId == ticket.ProjektId)
@@ -112,13 +135,11 @@ namespace Ticket_System.Controllers
         public async Task<IActionResult> Create(Ticket ticket)
         {
             var aktuellerBenutzer = await _userManager.GetUserAsync(User);
-            ticket.ErstellerId = aktuellerBenutzer.Id;
+            ticket.ErstellerId = aktuellerBenutzer!.Id;
             ticket.ErstelltAm = DateTime.Now;
 
             if (!string.IsNullOrEmpty(ticket.ZugewiesenerBenutzerId))
-            {
                 ticket.ZugewiesenAm = DateTime.Now;
-            }
 
             ModelState.Remove("ErstellerId");
             ModelState.Remove("Ersteller");
@@ -153,12 +174,7 @@ namespace Ticket_System.Controllers
 
             if (ticket == null) return NotFound();
 
-            var aktuellerBenutzer = await _userManager.GetUserAsync(User);
-            bool istAdmin = await _userManager.IsInRoleAsync(aktuellerBenutzer, "Admin");
-            bool istErsteller = ticket.ErstellerId == aktuellerBenutzer.Id;
-            bool istZugewiesener = ticket.ZugewiesenerBenutzerId == aktuellerBenutzer.Id;
-
-            if (!istAdmin && !istErsteller && !istZugewiesener)
+            if (!await HatZugriff(ticket))
                 return RedirectToAction("AccessDenied", "Account");
 
             var alleBenutzer = _userManager.Users.ToList();
@@ -167,20 +183,14 @@ namespace Ticket_System.Controllers
             return View(ticket);
         }
 
-        // POST: /Tickets/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, string Beschreibung, string? ZugewiesenerBenutzerId)
+        public async Task<IActionResult> Edit(int id, string Beschreibung, string? ZugewiesenerBenutzerId, string Status)
         {
             var ticket = await _context.Tickets.FindAsync(id);
             if (ticket == null) return NotFound();
 
-            var aktuellerBenutzer = await _userManager.GetUserAsync(User);
-            bool istAdmin = await _userManager.IsInRoleAsync(aktuellerBenutzer, "Admin");
-            bool istErsteller = ticket.ErstellerId == aktuellerBenutzer.Id;
-            bool istZugewiesener = ticket.ZugewiesenerBenutzerId == aktuellerBenutzer.Id;
-
-            if (!istAdmin && !istErsteller && !istZugewiesener)
+            if (!await HatZugriff(ticket))
                 return RedirectToAction("AccessDenied", "Account");
 
             ticket.Beschreibung = Beschreibung;
@@ -193,21 +203,31 @@ namespace Ticket_System.Controllers
                     : DateTime.Now;
             }
 
-            if (ticket.Status == "Gelöst")
+            // ✅ Status nur setzen wenn gültiger Wert
+            if (TicketStatus.Alle.Contains(Status))
             {
-                var offeneBlocker = await _context.TicketAbhaengigkeiten
-                    .Include(a => a.BlockierendesTicket)
-                    .Where(a => a.BlockiertesTicketId == ticket.Id
-                             && a.BlockierendesTicket.Status != "Gelöst")
-                    .ToListAsync();
-
-                if (offeneBlocker.Any())
+                // Blocker-Check nur wenn auf Gelöst gesetzt wird
+                if (Status == TicketStatus.Geloest)
                 {
-                    var titel = string.Join(", ", offeneBlocker.Select(b => $"#{b.BlockierendesTicketId}"));
-                    ModelState.AddModelError("Status",
-                        $"Ticket kann nicht gelöst werden. Folgende Blocker sind noch offen: {titel}");
-                    return View(ticket);
+                    var offeneBlocker = await _context.TicketAbhaengigkeiten
+                        .Include(a => a.BlockierendesTicket)
+                        .Where(a => a.BlockiertesTicketId == ticket.Id
+                                 && a.BlockierendesTicket.Status != TicketStatus.Geloest)
+                        .ToListAsync();
+
+                    if (offeneBlocker.Any())
+                    {
+                        var titel = string.Join(", ", offeneBlocker.Select(b => $"#{b.BlockierendesTicketId}"));
+                        ModelState.AddModelError("Status",
+                            $"Ticket kann nicht gelöst werden. Folgende Blocker sind noch offen: {titel}");
+
+                        var alleBenutzer2 = _userManager.Users.ToList();
+                        ViewBag.ZugewiesenerBenutzerId = new SelectList(alleBenutzer2, "Id", "UserName", ticket.ZugewiesenerBenutzerId);
+                        return View(ticket);
+                    }
                 }
+
+                ticket.Status = Status;
             }
 
             await _context.SaveChangesAsync();
@@ -222,15 +242,13 @@ namespace Ticket_System.Controllers
             var ticket = await _context.Tickets.FindAsync(id);
             if (ticket == null) return NotFound();
 
-            var aktuellerBenutzer = await _userManager.GetUserAsync(User);
-            bool istAdmin = await _userManager.IsInRoleAsync(aktuellerBenutzer, "Admin");
-            bool istErsteller = ticket.ErstellerId == aktuellerBenutzer.Id;
-            bool istZugewiesener = ticket.ZugewiesenerBenutzerId == aktuellerBenutzer.Id;
-
-            if (!istAdmin && !istErsteller && !istZugewiesener)
+            // ✅ Hilfsmethode statt dupliziertem Block
+            if (!await HatZugriff(ticket))
                 return RedirectToAction("AccessDenied", "Account");
 
-            ticket.GeschlossenVonId = aktuellerBenutzer.Id;
+            var aktuellerBenutzer = await _userManager.GetUserAsync(User);
+            ticket.Status = TicketStatus.Geloest;
+            ticket.GeschlossenVonId = aktuellerBenutzer!.Id;
             ticket.GeschlossenAm = DateTime.Now;
 
             await _context.SaveChangesAsync();
@@ -258,7 +276,7 @@ namespace Ticket_System.Controllers
             {
                 TicketId = ticketId,
                 Inhalt = inhalt.Trim(),
-                ErstellerId = user.Id,
+                ErstellerId = user!.Id,
                 Erstellzeitpunkt = DateTime.Now
             };
 
@@ -282,8 +300,8 @@ namespace Ticket_System.Controllers
             if (ticket == null) return NotFound();
 
             var aktuellerBenutzer = await _userManager.GetUserAsync(User);
-            bool istAdmin = await _userManager.IsInRoleAsync(aktuellerBenutzer, "Admin");
-            bool istErsteller = ticket.ErstellerId == aktuellerBenutzer.Id;
+            bool istAdmin = await _userManager.IsInRoleAsync(aktuellerBenutzer!, "Admin");
+            bool istErsteller = ticket.ErstellerId == aktuellerBenutzer!.Id;
 
             if (!istAdmin && !istErsteller)
                 return RedirectToAction("AccessDenied", "Account");
@@ -301,12 +319,10 @@ namespace Ticket_System.Controllers
                         .Include(t => t.BlockiertAndere)
                         .FirstOrDefaultAsync(t => t.Id == id);
 
-            if (ticket == null)
-                return NotFound();
+            if (ticket == null) return NotFound();
 
             _context.TicketAbhaengigkeiten.RemoveRange(ticket.WirdBlockiertDurch);
             _context.TicketAbhaengigkeiten.RemoveRange(ticket.BlockiertAndere);
-
             _context.Comments.RemoveRange(ticket.Comments);
             _context.Tickets.Remove(ticket);
             await _context.SaveChangesAsync();
@@ -315,25 +331,23 @@ namespace Ticket_System.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        // Blocker hinzufügen
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> BlockierungHinzufuegen(int ticketId, int blockerTicketId)
         {
-            // ✅ NEU: Kein Ticket ausgewählt (Dropdown-Standardwert = 0)
             if (blockerTicketId == 0)
             {
                 TempData["Error"] = "Bitte ein blockierendes Ticket auswählen.";
                 return RedirectToAction(nameof(Details), new { id = ticketId });
             }
 
-            // Selbst-Blockierung verhindern
             if (ticketId == blockerTicketId)
             {
                 TempData["Error"] = "Ein Ticket kann sich nicht selbst blockieren.";
                 return RedirectToAction(nameof(Details), new { id = ticketId });
             }
 
-            // Zirkuläre Abhängigkeit verhindern
             var zirkular = await _context.TicketAbhaengigkeiten
                 .AnyAsync(a => a.BlockiertesTicketId == blockerTicketId
                             && a.BlockierendesTicketId == ticketId);
@@ -343,7 +357,6 @@ namespace Ticket_System.Controllers
                 return RedirectToAction(nameof(Details), new { id = ticketId });
             }
 
-            // Duplikat verhindern
             var existiert = await _context.TicketAbhaengigkeiten
                 .AnyAsync(a => a.BlockiertesTicketId == ticketId
                             && a.BlockierendesTicketId == blockerTicketId);
@@ -365,12 +378,11 @@ namespace Ticket_System.Controllers
             return RedirectToAction(nameof(Details), new { id = ticketId });
         }
 
-        // ✅ FIX: Blocker entfernen
+        // Blocker entfernen
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> BlockierungEntfernen(int ticketId, int blockerTicketId)
         {
-            // ✅ NEU: FirstOrDefaultAsync statt FindAsync (kein Composite-Key-Reihenfolge-Risiko)
             var eintrag = await _context.TicketAbhaengigkeiten
                 .FirstOrDefaultAsync(a => a.BlockiertesTicketId == ticketId
                                        && a.BlockierendesTicketId == blockerTicketId);

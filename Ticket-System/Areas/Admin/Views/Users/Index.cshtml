@@ -1,0 +1,80 @@
+﻿@model IEnumerable<Microsoft.AspNetCore.Identity.IdentityUser>
+
+@{
+    ViewData["Title"] = "Benutzerverwaltung";
+    var userRoles = ViewBag.UserRoles as Dictionary<string, IList<string>>;
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="fw-bold">
+        <i class="bi bi-people me-2"></i>Benutzerverwaltung
+    </h2>
+    <div class="d-flex gap-2">
+        <a asp-area="Admin" asp-controller="Users" asp-action="Create"
+               class="btn btn-outline-primary btn-sm">
+            <i class="bi bi-person-plus me-1"></i>Neuer Benutzer
+        </a>
+        <a asp-area="Admin" asp-controller="Admin" asp-action="Index"
+               class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-arrow-left me-1"></i>Zurück
+        </a>
+    </div>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-body p-0">
+        <table class="table table-hover mb-0">
+            <thead class="table-dark">
+                <tr>
+                    <th><i class="bi bi-person me-1"></i>Benutzername</th>
+                    <th><i class="bi bi-envelope me-1"></i>E-Mail</th>
+                    <th><i class="bi bi-shield me-1"></i>Rollen</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var user in Model)
+                {
+                    var rollen = userRoles != null && userRoles.ContainsKey(user.Id)
+                        ? userRoles[user.Id]
+                        : new List<string>();
+
+                    <tr>
+                        <td class="fw-bold">@user.UserName</td>
+                        <td class="text-muted">@user.Email</td>
+                        <td>
+                            @if (rollen.Any())
+                            {
+                                @foreach (var rolle in rollen)
+                                {
+                                    <span class="badge me-1
+                                        @(rolle == "Admin" ? "badge-outline-danger" :
+                                                                                    rolle == "Developer" ? "badge-outline-primary" :
+                                                                                    "badge-outline-success")">
+                                        @rolle
+                                    </span>
+                                }
+                            }
+                            else
+                            {
+                                <span class="text-muted fst-italic">Keine Rolle</span>
+                            }
+                        </td>
+                        <td class="text-end">
+                            <a asp-area="Admin" asp-controller="Users"
+                                   asp-action="Details" asp-route-id="@user.Id"
+                                   class="btn btn-sm btn-outline-secondary me-1">
+                                <i class="bi bi-eye"></i>
+                            </a>
+                            <a asp-area="Admin" asp-controller="Users"
+                                   asp-action="Edit" asp-route-id="@user.Id"
+                                   class="btn btn-sm btn-outline-primary">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

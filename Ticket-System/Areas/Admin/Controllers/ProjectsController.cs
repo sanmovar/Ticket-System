@@ -29,6 +29,7 @@ namespace Ticket_System.Areas.Admin.Controllers
 
             int totalCount = await query.CountAsync();
             var projects = await query
+                .Include(p => p.Tickets) // ✅ direkt mitladen
                 .OrderBy(p => p.Titel)
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)

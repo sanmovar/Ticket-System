@@ -1,12 +1,29 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using Ticket_System.Models;
 
 namespace Ticket_System.Data
 {
-    // Diese Klasse legt beim Start der App automatisch Rollen und Benutzer an
     public static class DbSeeder
     {
         public static async Task SeedAsync(IServiceProvider serviceProvider)
         {
+            var db = serviceProvider.GetRequiredService<AppDbContext>();
+
+            // Tickets ohne gültigen Status auf "Offen" setzen
+            var gueltigeStatus = TicketStatus.Alle;
+            var ungueltigeTickets = await db.Tickets
+                .Where(t => !gueltigeStatus.Contains(t.Status))
+                .ToListAsync();
+
+            if (ungueltigeTickets.Any())
+            {
+                foreach (var t in ungueltigeTickets)
+                    t.Status = TicketStatus.Offen;
+
+                await db.SaveChangesAsync();
+            }
+
             var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
             var userManager = serviceProvider.GetRequiredService<UserManager<IdentityUser>>();
 
@@ -15,11 +32,8 @@ namespace Ticket_System.Data
 
             foreach (var role in roles)
             {
-                // Nur anlegen, wenn die Rolle noch nicht existiert
                 if (!await roleManager.RoleExistsAsync(role))
-                {
                     await roleManager.CreateAsync(new IdentityRole(role));
-                }
             }
 
             // --- Benutzer anlegen ---
@@ -31,12 +45,10 @@ namespace Ticket_System.Data
             await CreateUserAsync(userManager, "tester1@ticket.de", "Admin123", "Tester");
         }
 
-        // Hilfsmethode: Benutzer erstellen und Rolle zuweisen
         private static async Task CreateUserAsync(
             UserManager<IdentityUser> userManager,
             string email, string password, string role)
         {
-            // Nur anlegen, wenn der Benutzer noch nicht existiert
             if (await userManager.FindByEmailAsync(email) == null)
             {
                 var user = new IdentityUser
@@ -49,9 +61,7 @@ namespace Ticket_System.Data
                 var result = await userManager.CreateAsync(user, password);
 
                 if (result.Succeeded)
-                {
                     await userManager.AddToRoleAsync(user, role);
-                }
             }
         }
     }

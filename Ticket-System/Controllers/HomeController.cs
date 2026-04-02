@@ -26,8 +26,11 @@ namespace Ticket_System.Controllers
                 // Ticket-Statistiken
                 statistik.TicketsGesamt = await _context.Tickets.CountAsync();
                 statistik.TicketsGeschlossen = await _context.Tickets
-                    .CountAsync(t => t.GeschlossenAm != null);
-                statistik.TicketsOffen = statistik.TicketsGesamt - statistik.TicketsGeschlossen;
+                    .CountAsync(t => t.Status == TicketStatus.Geloest || t.Status == 
+                    TicketStatus.Abgebrochen);
+                statistik.TicketsOffen = await _context.Tickets
+                    .CountAsync(t => t.Status == TicketStatus.Offen || t.Status == 
+                    TicketStatus.InBearbeitung);
 
                 // Projekt-Statistiken
                 statistik.ProjekteGesamt = await _context.Projects.CountAsync();

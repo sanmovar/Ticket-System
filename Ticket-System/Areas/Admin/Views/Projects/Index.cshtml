@@ -1,4 +1,5 @@
 ﻿@model IEnumerable<Project>
+@using Ticket_System.Models
 
 @{
     ViewData["Title"] = "Projekte";
@@ -28,7 +29,6 @@
     </span>
 </div>
 
-
 <div class="card shadow-sm">
     <div class="card-body p-0">
         <table class="table table-hover mb-0">
@@ -39,17 +39,22 @@
                     <th>Startdatum</th>
                     <th>Enddatum</th>
                     <th>Status</th>
+                    <th>Tickets</th>
                     <th></th>
                 </tr>
             </thead>
             <tbody>
                 @foreach (var item in Model)
                 {
+                    // ✅ Direkt aus Navigation-Property – kein Dictionary nötig
+                    int gesamt = item.Tickets.Count;
+                    int offen = item.Tickets.Count(t => t.Status == TicketStatus.Offen
+                                                      || t.Status == TicketStatus.InBearbeitung);
                     <tr>
-                        <td class="fw-bold">@Html.DisplayFor(modelItem => item.Titel)</td>
-                        <td class="text-muted">@Html.DisplayFor(modelItem => item.Beschreibung)</td>
-                        <td>@Html.DisplayFor(modelItem => item.Startdatum)</td>
-                        <td>@Html.DisplayFor(modelItem => item.Enddatum)</td>
+                        <td class="fw-bold">@item.Titel</td>
+                        <td class="text-muted">@item.Beschreibung</td>
+                        <td>@item.Startdatum.ToString("dd.MM.yyyy")</td>
+                        <td>@(item.Enddatum?.ToString("dd.MM.yyyy") ?? "-")</td>
                         <td>
                             @if (item.Enddatum != null && item.Enddatum < DateTime.Now)
                             {
@@ -62,6 +67,30 @@
                                 <span class="badge badge-outline-warning">
                                     <i class="bi bi-play-circle me-1"></i>Aktiv
                                 </span>
+                            }
+                        </td>
+                        <td>
+                            @if (gesamt == 0)
+                            {
+                                <span class="text-muted fst-italic small">Keine</span>
+                            }
+                            else
+                            {
+                                <span class="badge badge-outline-secondary" title="Tickets gesamt">
+                                    <i class="bi bi-ticket-perforated me-1"></i>@gesamt
+                                </span>
+                                @if (offen > 0)
+                                {
+                                    <span class="badge badge-outline-warning ms-1">
+                                        <i class="bi bi-clock me-1"></i>@offen offen
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="badge badge-outline-success ms-1">
+                                        <i class="bi bi-check-circle me-1"></i>alle erledigt
+                                    </span>
+                                }
                             }
                         </td>
                         <td class="text-end">
@@ -115,7 +144,6 @@
         </ul>
     </nav>
 }
-
 
 <div class="mt-3">
     <a asp-area="Admin" asp-controller="Admin" asp-action="Index"

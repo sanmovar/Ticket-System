@@ -1,0 +1,26 @@
+﻿@model string
+@using Ticket_System.Models
+
+@switch (Model)
+{
+    case TicketStatus.Geloest:
+        <span class="badge badge-outline-success">
+            <i class="bi bi-check-circle me-1"></i>Gelöst
+        </span>
+        break;
+    case TicketStatus.InBearbeitung:
+        <span class="badge badge-outline-primary">
+            <i class="bi bi-arrow-clockwise me-1"></i>In Bearbeitung
+        </span>
+        break;
+    case TicketStatus.Abgebrochen:
+        <span class="badge badge-outline-secondary">
+            <i class="bi bi-x-circle me-1"></i>Abgebrochen
+        </span>
+        break;
+    default:
+        <span class="badge badge-outline-warning">
+            <i class="bi bi-unlock me-1"></i>Offen
+        </span>
+        break;
+}

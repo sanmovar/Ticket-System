@@ -1,0 +1,84 @@
+﻿@{
+    ViewData["Title"] = "Neuen Benutzer anlegen";
+    var alleRollen = ViewBag.AlleRollen as List<string> ?? new List<string>();
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="fw-bold">
+        <i class="bi bi-person-plus me-2"></i>Neuen Benutzer anlegen
+    </h2>
+    <a asp-area="Admin" asp-controller="Users" asp-action="Index"
+           class="btn btn-outline-secondary btn-sm">
+        <i class="bi bi-arrow-left me-1"></i>Zurück
+    </a>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-body">
+        <form asp-area="Admin" asp-controller="Users" asp-action="Create" method="post">
+            @Html.AntiForgeryToken()
+
+            @* Fehleranzeige *@
+            @if (!ViewData.ModelState.IsValid)
+            {
+                <div class="alert alert-danger">
+                    @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                    {
+                        <div><i class="bi bi-exclamation-circle me-1"></i>@error.ErrorMessage</div>
+                    }
+                </div>
+            }
+
+            <div class="mb-3">
+                <label class="form-label fw-bold">
+                    <i class="bi bi-envelope me-1"></i>E-Mail / Benutzername
+                    <span class="text-danger">*</span>
+                </label>
+                <input type="email" name="email" class="form-control"
+                       placeholder="benutzer@example.de" required />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label fw-bold">
+                    <i class="bi bi-key me-1"></i>Passwort
+                    <span class="text-danger">*</span>
+                </label>
+                <input type="password" name="passwort" class="form-control"
+                       placeholder="Mind. 6 Zeichen" required />
+            </div>
+
+            <div class="mb-4">
+                <label class="form-label fw-bold">
+                    <i class="bi bi-shield me-1"></i>Rollen
+                </label>
+                <div class="d-flex flex-wrap gap-3 mt-1">
+                    @foreach (var rolle in alleRollen)
+                    {
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox"
+                                   name="rollen" value="@rolle" id="rolle_@rolle" />
+                            <label class="form-check-label" for="rolle_@rolle">
+                                <span class="badge
+                                    @(rolle == "Admin" ? "badge-outline-danger" :
+                                                                            rolle == "Developer" ? "badge-outline-primary" :
+                                                                            "badge-outline-success")">
+                                    @rolle
+                                </span>
+                            </label>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-outline-primary btn-sm">
+                    <i class="bi bi-person-plus me-1"></i>Benutzer anlegen
+                </button>
+                <a asp-area="Admin" asp-controller="Users" asp-action="Index"
+                       class="btn btn-outline-secondary btn-sm">
+                    <i class="bi bi-x me-1"></i>Abbrechen
+                </a>
+            </div>
+        </form>
+    </div>
+</div>

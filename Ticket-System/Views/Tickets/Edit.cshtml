@@ -1,4 +1,5 @@
 ﻿@model Ticket
+@using Ticket_System.Models
 
 @{
     ViewData["Title"] = "Ticket bearbeiten";
@@ -17,12 +18,14 @@
     </div>
     <div class="card-body">
         <form asp-action="Edit" method="post">
+            @Html.AntiForgeryToken()
             <input type="hidden" name="id" value="@Model.Id" />
 
             <div class="mb-3">
                 <label class="form-label fw-bold">Beschreibung</label>
                 <textarea name="Beschreibung" class="form-control" rows="4">@Model.Beschreibung</textarea>
             </div>
+
             <div class="mb-3">
                 <label class="form-label fw-bold">Zuweisen an (optional)</label>
                 <select name="ZugewiesenerBenutzerId" class="form-select"
@@ -30,12 +33,38 @@
                     <option value="">-- Niemanden zuweisen --</option>
                 </select>
             </div>
+
+            @* Status-Dropdown *@
+            <div class="mb-3">
+                <label class="form-label fw-bold">
+                    <i class="bi bi-flag me-1"></i>Status
+                </label>
+                <select name="Status" class="form-select">
+                    @foreach (var status in TicketStatus.Alle)
+                    {
+                        <option value="@status"
+                                selected="@(Model.Status == status ? "selected" : null)">
+                            @status
+                        </option>
+                    }
+                </select>
+                @* Fehlermeldung bei Blocker-Verletzung *@
+                @if (ViewData.ModelState["Status"]?.Errors.Any() == true)
+                {
+                    <div class="text-danger small mt-1">
+                        <i class="bi bi-exclamation-circle me-1"></i>
+                        @ViewData.ModelState["Status"]!.Errors.First().ErrorMessage
+                    </div>
+                }
+            </div>
+
             <div class="d-flex gap-2">
-                <button type="submit" class="btn btn-outline-primary">
-                    <i class="bi bi-floppy me-1"></i>Speichern
+                <button type="submit" class="btn btn-outline-primary btn-sm">
+                    <i class="bi bi-save me-1"></i>Speichern
                 </button>
-                <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-outline-secondary">
-                    <i class="bi bi-x-circle me-1"></i>Abbrechen
+                <a asp-action="Details" asp-route-id="@Model.Id"
+                       class="btn btn-outline-secondary btn-sm">
+                    <i class="bi bi-x me-1"></i>Abbrechen
                 </a>
             </div>
         </form>
