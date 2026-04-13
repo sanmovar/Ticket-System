@@ -6,27 +6,32 @@ namespace Ticket_System
 {
     public class Program
     {
-        // ✅ async Task statt void
         public static async Task Main(string[] args)
-
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            builder.Services.AddDbContext<AppDbContext>(options =>
-                                            options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+            // ✅ Локально — MS SQL, на Railway — PostgreSQL
+            if (builder.Environment.IsDevelopment())
+            {
+                builder.Services.AddDbContext<AppDbContext>(options =>
+                    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+            }
+            else
+            {
+                builder.Services.AddDbContext<AppDbContext>(options =>
+                    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+            }
 
             builder.Services.AddIdentity<IdentityUser, IdentityRole>(options =>
             {
-                // Passwort-Regeln (für Entwicklung etwas einfacher)
                 options.Password.RequireDigit = false;
                 options.Password.RequiredLength = 6;
                 options.Password.RequireNonAlphanumeric = false;
                 options.Password.RequireUppercase = false;
             })
-                .AddEntityFrameworkStores<AppDbContext>() // Identity nutzt unsere Datenbank
+                .AddEntityFrameworkStores<AppDbContext>()
                 .AddDefaultTokenProviders();
 
-            // Add services to the container.
             builder.Services.AddControllersWithViews();
 
             var app = builder.Build();
@@ -38,8 +43,6 @@ namespace Ticket_System
                 await DbSeeder.SeedAsync(scope.ServiceProvider);
             }
 
-
-            // Configure the HTTP request pipeline.
             if (!app.Environment.IsDevelopment())
             {
                 app.UseExceptionHandler("/Home/Error");
@@ -54,7 +57,6 @@ namespace Ticket_System
 
             app.MapStaticAssets();
 
-            // Route für Areas (Admin-Bereich) - muss VOR der Standard-Route stehen!
             app.MapControllerRoute(
                 name: "areas",
                 pattern: "{area:exists}/{controller=Admin}/{action=Index}/{id?}");

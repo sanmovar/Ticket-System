@@ -12,8 +12,8 @@ using Ticket_System.Data;
 namespace Ticket_System.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260331064948_TicketAbhaengigkeiten")]
-    partial class TicketAbhaengigkeiten
+    [Migration("20260413115414_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -312,6 +312,10 @@ namespace Ticket_System.Migrations
                     b.Property<int>("ProjektId")
                         .HasColumnType("int");
 
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Titel")
                         .IsRequired()
                         .HasMaxLength(200)
@@ -348,7 +352,7 @@ namespace Ticket_System.Migrations
 
                     b.HasIndex("BlockierendesTicketId");
 
-                    b.ToTable("TicketAbhaengigkeit");
+                    b.ToTable("TicketAbhaengigkeiten");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -434,7 +438,7 @@ namespace Ticket_System.Migrations
                         .HasForeignKey("GeschlossenVonId");
 
                     b.HasOne("Ticket_System.Models.Project", "Projekt")
-                        .WithMany()
+                        .WithMany("Tickets")
                         .HasForeignKey("ProjektId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -469,6 +473,11 @@ namespace Ticket_System.Migrations
                     b.Navigation("BlockierendesTicket");
 
                     b.Navigation("BlockiertesTicket");
+                });
+
+            modelBuilder.Entity("Ticket_System.Models.Project", b =>
+                {
+                    b.Navigation("Tickets");
                 });
 
             modelBuilder.Entity("Ticket_System.Models.Ticket", b =>

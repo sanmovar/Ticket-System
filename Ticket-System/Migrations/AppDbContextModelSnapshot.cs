@@ -435,7 +435,7 @@ namespace Ticket_System.Migrations
                         .HasForeignKey("GeschlossenVonId");
 
                     b.HasOne("Ticket_System.Models.Project", "Projekt")
-                        .WithMany()
+                        .WithMany("Tickets")
                         .HasForeignKey("ProjektId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -470,6 +470,11 @@ namespace Ticket_System.Migrations
                     b.Navigation("BlockierendesTicket");
 
                     b.Navigation("BlockiertesTicket");
+                });
+
+            modelBuilder.Entity("Ticket_System.Models.Project", b =>
+                {
+                    b.Navigation("Tickets");
                 });
 
             modelBuilder.Entity("Ticket_System.Models.Ticket", b =>

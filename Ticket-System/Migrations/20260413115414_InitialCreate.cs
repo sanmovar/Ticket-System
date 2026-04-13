@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Ticket_System.Migrations
 {
     /// <inheritdoc />
-    public partial class AddIdentity : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -48,6 +48,22 @@ namespace Ticket_System.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_AspNetUsers", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Projects",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Titel = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    Beschreibung = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Startdatum = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    Enddatum = table.Column<DateTime>(type: "datetime2", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Projects", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -156,6 +172,102 @@ namespace Ticket_System.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "Tickets",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Titel = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
+                    Beschreibung = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: false),
+                    Status = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ProjektId = table.Column<int>(type: "int", nullable: false),
+                    ErstellerId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    ErstelltAm = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    ZugewiesenerBenutzerId = table.Column<string>(type: "nvarchar(450)", nullable: true),
+                    ZugewiesenAm = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    GeschlossenVonId = table.Column<string>(type: "nvarchar(450)", nullable: true),
+                    GeschlossenAm = table.Column<DateTime>(type: "datetime2", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Tickets", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Tickets_AspNetUsers_ErstellerId",
+                        column: x => x.ErstellerId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Tickets_AspNetUsers_GeschlossenVonId",
+                        column: x => x.GeschlossenVonId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_Tickets_AspNetUsers_ZugewiesenerBenutzerId",
+                        column: x => x.ZugewiesenerBenutzerId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_Tickets_Projects_ProjektId",
+                        column: x => x.ProjektId,
+                        principalTable: "Projects",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Comments",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Inhalt = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: false),
+                    TicketId = table.Column<int>(type: "int", nullable: false),
+                    ErstellerId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    Erstellzeitpunkt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Comments", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Comments_AspNetUsers_ErstellerId",
+                        column: x => x.ErstellerId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Comments_Tickets_TicketId",
+                        column: x => x.TicketId,
+                        principalTable: "Tickets",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "TicketAbhaengigkeiten",
+                columns: table => new
+                {
+                    BlockiertesTicketId = table.Column<int>(type: "int", nullable: false),
+                    BlockierendesTicketId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_TicketAbhaengigkeiten", x => new { x.BlockiertesTicketId, x.BlockierendesTicketId });
+                    table.ForeignKey(
+                        name: "FK_TicketAbhaengigkeiten_Tickets_BlockierendesTicketId",
+                        column: x => x.BlockierendesTicketId,
+                        principalTable: "Tickets",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_TicketAbhaengigkeiten_Tickets_BlockiertesTicketId",
+                        column: x => x.BlockiertesTicketId,
+                        principalTable: "Tickets",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",
                 table: "AspNetRoleClaims",
@@ -194,6 +306,41 @@ namespace Ticket_System.Migrations
                 column: "NormalizedUserName",
                 unique: true,
                 filter: "[NormalizedUserName] IS NOT NULL");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Comments_ErstellerId",
+                table: "Comments",
+                column: "ErstellerId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Comments_TicketId",
+                table: "Comments",
+                column: "TicketId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_TicketAbhaengigkeiten_BlockierendesTicketId",
+                table: "TicketAbhaengigkeiten",
+                column: "BlockierendesTicketId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Tickets_ErstellerId",
+                table: "Tickets",
+                column: "ErstellerId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Tickets_GeschlossenVonId",
+                table: "Tickets",
+                column: "GeschlossenVonId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Tickets_ProjektId",
+                table: "Tickets",
+                column: "ProjektId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Tickets_ZugewiesenerBenutzerId",
+                table: "Tickets",
+                column: "ZugewiesenerBenutzerId");
         }
 
         /// <inheritdoc />
@@ -215,10 +362,22 @@ namespace Ticket_System.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
+                name: "Comments");
+
+            migrationBuilder.DropTable(
+                name: "TicketAbhaengigkeiten");
+
+            migrationBuilder.DropTable(
                 name: "AspNetRoles");
 
             migrationBuilder.DropTable(
+                name: "Tickets");
+
+            migrationBuilder.DropTable(
                 name: "AspNetUsers");
+
+            migrationBuilder.DropTable(
+                name: "Projects");
         }
     }
 }
