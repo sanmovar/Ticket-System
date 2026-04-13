@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Ticket_System.Data;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 
 namespace Ticket_System
 {
