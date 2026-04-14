@@ -8,10 +8,10 @@ namespace Ticket_System.Models
 
         [Required(ErrorMessage = "Titel ist erforderlich")]
         [StringLength(100)]
-        public string? Titel { get; set; }
+        public string Titel { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "Beschreibung ist erforderlich")]
-        public string? Beschreibung { get; set; }
+        public string Beschreibung { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "Startdatum ist erforderlich")]
         [DataType(DataType.Date)]

@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using Ticket_System.Data;
 
 namespace Ticket_System.Areas.Admin.Controllers
 {
@@ -12,11 +12,16 @@ namespace Ticket_System.Areas.Admin.Controllers
     {
         private readonly UserManager<IdentityUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
+        private readonly AppDbContext _context;
 
-        public UsersController(UserManager<IdentityUser> userManager, RoleManager<IdentityRole> roleManager)
+        public UsersController(
+            UserManager<IdentityUser> userManager,
+            RoleManager<IdentityRole> roleManager,
+            AppDbContext context)
         {
             _userManager = userManager;
             _roleManager = roleManager;
+            _context = context;
         }
 
         // GET: /Admin/Users
@@ -24,12 +29,18 @@ namespace Ticket_System.Areas.Admin.Controllers
         {
             var users = await _userManager.Users.ToListAsync();
 
-            // Für jeden Benutzer die Rollen laden
-            var userRoles = new Dictionary<string, IList<string>>();
-            foreach (var user in users)
-            {
-                userRoles[user.Id] = await _userManager.GetRolesAsync(user);
-            }
+            var userRoleMap = await (
+                from ur in _context.UserRoles
+                join r in _context.Roles on ur.RoleId equals r.Id
+                select new { ur.UserId, RoleName = r.Name! }
+            ).ToListAsync();
+
+            var userRoles = userRoleMap
+                .GroupBy(x => x.UserId)
+                .ToDictionary(
+                    g => g.Key,
+                    g => (IList<string>)g.Select(x => x.RoleName).ToList()
+                );
 
             ViewBag.UserRoles = userRoles;
             return View(users);
@@ -55,7 +66,7 @@ namespace Ticket_System.Areas.Admin.Controllers
             var user = await _userManager.FindByIdAsync(id);
             if (user == null) return NotFound();
 
-            var alleRollen = _roleManager.Roles.Select(r => r.Name!).ToList();
+            var alleRollen = await _roleManager.Roles.Select(r => r.Name!).ToListAsync();
             var benutzerRollen = await _userManager.GetRolesAsync(user);
 
             ViewBag.AlleRollen = alleRollen;
@@ -72,7 +83,14 @@ namespace Ticket_System.Areas.Admin.Controllers
             var user = await _userManager.FindByIdAsync(id);
             if (user == null) return NotFound();
 
-            // E-Mail / Username aktualisieren
+            if (!rollen.Any())
+            {
+                ModelState.AddModelError("", "Der Benutzer muss mindestens eine Rolle haben.");
+                ViewBag.AlleRollen = await _roleManager.Roles.Select(r => r.Name!).ToListAsync();
+                ViewBag.BenutzerRollen = await _userManager.GetRolesAsync(user);
+                return View(user);
+            }
+
             if (!string.IsNullOrWhiteSpace(neuEmail) && user.Email != neuEmail)
             {
                 user.Email = neuEmail;
@@ -83,28 +101,24 @@ namespace Ticket_System.Areas.Admin.Controllers
                     foreach (var error in updateResult.Errors)
                         ModelState.AddModelError("", error.Description);
 
-                    var alleRollen2 = _roleManager.Roles.Select(r => r.Name!).ToList();
-                    var benutzerRollen2 = await _userManager.GetRolesAsync(user);
-                    ViewBag.AlleRollen = alleRollen2;
-                    ViewBag.BenutzerRollen = benutzerRollen2;
+                    ViewBag.AlleRollen = await _roleManager.Roles.Select(r => r.Name!).ToListAsync();
+                    ViewBag.BenutzerRollen = await _userManager.GetRolesAsync(user);
                     return View(user);
                 }
             }
 
-            // Rollen aktualisieren: alte entfernen, neue hinzufügen
             var aktuelleRollen = await _userManager.GetRolesAsync(user);
             await _userManager.RemoveFromRolesAsync(user, aktuelleRollen);
-            if (rollen.Any())
-                await _userManager.AddToRolesAsync(user, rollen);
+            await _userManager.AddToRolesAsync(user, rollen);
 
             TempData["Success"] = "✅ Benutzer wurde erfolgreich aktualisiert!";
             return RedirectToAction(nameof(Index));
         }
 
         // GET: /Admin/Users/Create
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
-            ViewBag.AlleRollen = _roleManager.Roles.Select(r => r.Name!).ToList();
+            ViewBag.AlleRollen = await _roleManager.Roles.Select(r => r.Name!).ToListAsync();
             return View();
         }
 
@@ -116,7 +130,7 @@ namespace Ticket_System.Areas.Admin.Controllers
             if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(passwort))
             {
                 ModelState.AddModelError("", "E-Mail und Passwort sind Pflichtfelder.");
-                ViewBag.AlleRollen = _roleManager.Roles.Select(r => r.Name!).ToList();
+                ViewBag.AlleRollen = await _roleManager.Roles.Select(r => r.Name!).ToListAsync();
                 return View();
             }
 
@@ -128,13 +142,12 @@ namespace Ticket_System.Areas.Admin.Controllers
             };
 
             var result = await _userManager.CreateAsync(user, passwort);
-
             if (!result.Succeeded)
             {
                 foreach (var error in result.Errors)
                     ModelState.AddModelError("", error.Description);
 
-                ViewBag.AlleRollen = _roleManager.Roles.Select(r => r.Name!).ToList();
+                ViewBag.AlleRollen = await _roleManager.Roles.Select(r => r.Name!).ToListAsync();
                 return View();
             }
 
@@ -142,6 +155,56 @@ namespace Ticket_System.Areas.Admin.Controllers
                 await _userManager.AddToRolesAsync(user, rollen);
 
             TempData["Success"] = "✅ Benutzer wurde erfolgreich angelegt!";
+            return RedirectToAction(nameof(Index));
+        }
+
+        // GET: /Admin/Users/Delete/5
+        public async Task<IActionResult> Delete(string id)
+        {
+            if (id == null) return NotFound();
+
+            var user = await _userManager.FindByIdAsync(id);
+            if (user == null) return NotFound();
+
+            var aktuellerBenutzer = await _userManager.GetUserAsync(User);
+            if (user.Id == aktuellerBenutzer!.Id)
+            {
+                TempData["Error"] = "Sie können Ihren eigenen Account nicht löschen.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            ViewBag.Rollen = await _userManager.GetRolesAsync(user);
+            return View(user);
+        }
+
+        // POST: /Admin/Users/Delete/5
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteConfirmed(string id)
+        {
+            var user = await _userManager.FindByIdAsync(id);
+            if (user == null) return NotFound();
+
+            var aktuellerBenutzer = await _userManager.GetUserAsync(User);
+            if (user.Id == aktuellerBenutzer!.Id)
+            {
+                TempData["Error"] = "Sie können Ihren eigenen Account nicht löschen.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            var istAdmin = await _userManager.IsInRoleAsync(user, "Admin");
+            if (istAdmin)
+            {
+                var alleAdmins = await _userManager.GetUsersInRoleAsync("Admin");
+                if (alleAdmins.Count <= 1)
+                {
+                    TempData["Error"] = "Der letzte Administrator kann nicht gelöscht werden.";
+                    return RedirectToAction(nameof(Index));
+                }
+            }
+
+            await _userManager.DeleteAsync(user);
+            TempData["Success"] = "✅ Benutzer wurde erfolgreich gelöscht.";
             return RedirectToAction(nameof(Index));
         }
     }

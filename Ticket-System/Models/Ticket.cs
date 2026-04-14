@@ -10,14 +10,20 @@ namespace Ticket_System.Models
 
         [Required(ErrorMessage = "Der Titel ist erforderlich.")]
         [StringLength(200, ErrorMessage = "Der Titel darf maximal 200 Zeichen lang sein.")]
-        public string? Titel { get; set; }
+        public string Titel { get; set; } = string.Empty;
 
-        [StringLength(1000, ErrorMessage = "Die Beschreibung darf maximal 1000 Zeichen lang sein.")]
         [Required(ErrorMessage = "Die Beschreibung ist erforderlich.")]
-        public string? Beschreibung { get; set; }
+        [StringLength(1000, ErrorMessage = "Die Beschreibung darf maximal 1000 Zeichen lang sein.")]
+        public string Beschreibung { get; set; } = string.Empty;
 
         [Required]
-        public string Status { get; set; } = TicketStatus.Offen; 
+        [AllowedValues(
+            TicketStatus.Offen,
+            TicketStatus.InBearbeitung,
+            TicketStatus.Geloest,
+            TicketStatus.Abgebrochen,
+            ErrorMessage = "Ungültiger Ticket-Status.")]
+        public string Status { get; set; } = TicketStatus.Offen;
 
         [Required(ErrorMessage = "Projekt ist erforderlich.")]
         public int ProjektId { get; set; }
