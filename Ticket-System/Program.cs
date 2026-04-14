@@ -35,6 +35,8 @@ namespace Ticket_System
 
             builder.Services.AddControllersWithViews();
 
+            AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
+
             var app = builder.Build();
 
             using (var scope = app.Services.CreateScope())
