@@ -17,7 +17,7 @@ namespace Ticket_System.Models
         public string? Beschreibung { get; set; }
 
         [Required]
-        public string Status { get; set; } = TicketStatus.Offen; // ✅ kein Magic String mehr
+        public string Status { get; set; } = TicketStatus.Offen; 
 
         [Required(ErrorMessage = "Projekt ist erforderlich.")]
         public int ProjektId { get; set; }
@@ -31,7 +31,7 @@ namespace Ticket_System.Models
         [ForeignKey("ErstellerId")]
         public IdentityUser? Ersteller { get; set; }
 
-        public DateTime ErstelltAm { get; set; } = DateTime.Now;
+        public DateTime ErstelltAm { get; set; } = DateTime.UtcNow;
 
         public string? ZugewiesenerBenutzerId { get; set; }
 

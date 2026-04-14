@@ -80,8 +80,8 @@ namespace Ticket_System.Data
                 {
                     Titel = titel,
                     Beschreibung = beschreibung,
-                    Startdatum = DateTime.Now.AddMonths(-i - 1),
-                    Enddatum = DateTime.Now.AddMonths(6 - i)
+                    Startdatum = DateTime.UtcNow.AddMonths(-i - 1),
+                    Enddatum = DateTime.UtcNow.AddMonths(6 - i)
                 };
                 db.Projects.Add(projekt);
                 alleProjekte.Add(projekt);
@@ -104,9 +104,9 @@ namespace Ticket_System.Data
                         Status = status,
                         ProjektId = alleProjekte[pi].Id,
                         ErstellerId = admin!.Id,
-                        ErstelltAm = DateTime.Now.AddDays(-(pi * 3 + ti)),
+                        ErstelltAm = DateTime.UtcNow.AddDays(-(pi * 3 + ti)),
                         ZugewiesenerBenutzerId = zugewiesener?.Id,
-                        ZugewiesenAm = zugewiesener != null ? DateTime.Now.AddDays(-(pi * 3 + ti - 1)) : null
+                        ZugewiesenAm = zugewiesener != null ? DateTime.UtcNow.AddDays(-(pi * 3 + ti - 1)) : null
                     };
                     db.Tickets.Add(ticket);
                     alleTickets.Add((ticket, pi, ti));
