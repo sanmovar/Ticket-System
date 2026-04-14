@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Ticket_System.Data;
-using Microsoft.EntityFrameworkCore.Diagnostics;
 
 namespace Ticket_System
 {
@@ -40,7 +39,18 @@ namespace Ticket_System
             using (var scope = app.Services.CreateScope())
             {
                 var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-                db.Database.Migrate();
+
+                if (app.Environment.IsDevelopment())
+                {
+                    // ✅ Локально — применяем MS SQL миграции
+                    db.Database.Migrate();
+                }
+                else
+                {
+                    // ✅ Railway — БД уже есть, просто проверяем таблицы
+                    db.Database.EnsureCreated();
+                }
+
                 await DbSeeder.SeedAsync(scope.ServiceProvider);
             }
 
