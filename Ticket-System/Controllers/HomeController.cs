@@ -35,7 +35,7 @@ namespace Ticket_System.Controllers
                 // Projekt-Statistiken
                 statistik.ProjekteGesamt = await _context.Projects.CountAsync();
                 statistik.ProjekteBeendet = await _context.Projects
-                    .CountAsync(p => p.Enddatum != null && p.Enddatum < DateTime.Now);
+                    .CountAsync(p => p.Enddatum != null && p.Enddatum < DateTime.UtcNow);
                 statistik.ProjekteAktiv = statistik.ProjekteGesamt - statistik.ProjekteBeendet;
 
                 // Benutzer-Statistiken 

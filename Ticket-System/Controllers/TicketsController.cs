@@ -118,7 +118,7 @@ namespace Ticket_System.Controllers
         public IActionResult Create()
         {
             var aktiveProjekte = _context.Projects
-                .Where(p => p.Enddatum == null || p.Enddatum > DateTime.Now)
+                .Where(p => p.Enddatum == null || p.Enddatum > DateTime.UtcNow)
                 .ToList();
 
             var alleBenutzer = _userManager.Users.ToList();
@@ -136,10 +136,10 @@ namespace Ticket_System.Controllers
         {
             var aktuellerBenutzer = await _userManager.GetUserAsync(User);
             ticket.ErstellerId = aktuellerBenutzer!.Id;
-            ticket.ErstelltAm = DateTime.Now;
+            ticket.ErstelltAm = DateTime.UtcNow;
 
             if (!string.IsNullOrEmpty(ticket.ZugewiesenerBenutzerId))
-                ticket.ZugewiesenAm = DateTime.Now;
+                ticket.ZugewiesenAm = DateTime.UtcNow;
 
             ModelState.Remove("ErstellerId");
             ModelState.Remove("Ersteller");
@@ -153,7 +153,7 @@ namespace Ticket_System.Controllers
             }
 
             var aktiveProjekte = _context.Projects
-                .Where(p => p.Enddatum == null || p.Enddatum > DateTime.Now)
+                .Where(p => p.Enddatum == null || p.Enddatum > DateTime.UtcNow)
                 .ToList();
             var alleBenutzer = _userManager.Users.ToList();
             ViewBag.ProjektId = new SelectList(aktiveProjekte, "Id", "Titel", ticket.ProjektId);
@@ -200,7 +200,7 @@ namespace Ticket_System.Controllers
                 ticket.ZugewiesenerBenutzerId = ZugewiesenerBenutzerId;
                 ticket.ZugewiesenAm = string.IsNullOrEmpty(ZugewiesenerBenutzerId)
                     ? null
-                    : DateTime.Now;
+                    : DateTime.UtcNow;
             }
 
             // ✅ Status nur setzen wenn gültiger Wert
@@ -249,7 +249,7 @@ namespace Ticket_System.Controllers
             var aktuellerBenutzer = await _userManager.GetUserAsync(User);
             ticket.Status = TicketStatus.Geloest;
             ticket.GeschlossenVonId = aktuellerBenutzer!.Id;
-            ticket.GeschlossenAm = DateTime.Now;
+            ticket.GeschlossenAm = DateTime.UtcNow;
 
             await _context.SaveChangesAsync();
             TempData["Success"] = "🔒 Ticket wurde erfolgreich geschlossen!";
@@ -277,7 +277,7 @@ namespace Ticket_System.Controllers
                 TicketId = ticketId,
                 Inhalt = inhalt.Trim(),
                 ErstellerId = user!.Id,
-                Erstellzeitpunkt = DateTime.Now
+                Erstellzeitpunkt = DateTime.UtcNow
             };
 
             _context.Comments.Add(comment);
