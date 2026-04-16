@@ -22,7 +22,7 @@ namespace Ticket_System.Data
         {
             base.OnModelCreating(modelBuilder);
 
-            // Beziehung Ticket–Comment: kein Cascade Delete (verhindert multiple cascade paths)
+            // kein Cascade Delete
             modelBuilder.Entity<Comment>()
                 .HasOne(c => c.Ticket)
                 .WithMany(t => t.Comments)

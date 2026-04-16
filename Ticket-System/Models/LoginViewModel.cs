@@ -2,7 +2,6 @@
 
 namespace Ticket_System.Models
 {
-    // ViewModel = Datenklasse speziell für ein Formular
     public class LoginViewModel
     {
         [Required(ErrorMessage = "E-Mail ist erforderlich")]

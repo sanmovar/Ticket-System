@@ -20,7 +20,7 @@ namespace Ticket_System.Controllers
             _userManager = userManager;
         }
 
-        // Zentrale Zugriffsprüfung — Admin, Ersteller oder Zugewiesener
+        // Dürfen nur Admin, Ersteller oder Zugewiesener
         private async Task<bool> HatZugriff(Ticket ticket)
         {
             var user = await _userManager.GetUserAsync(User);

@@ -12,7 +12,6 @@
     </a>
 </div>
 
-<!-- PageSize Auswahl -->
 <div class="d-flex align-items-center gap-2 mb-3">
     <span class="fw-bold text-muted small">Einträge pro Seite:</span>
     @foreach (var size in new[] { 10, 30, 50 })
@@ -46,7 +45,6 @@
             <tbody>
                 @foreach (var item in Model)
                 {
-                    // ✅ Direkt aus Navigation-Property – kein Dictionary nötig
                     int gesamt = item.Tickets.Count;
                     int offen = item.Tickets.Count(t => t.Status == TicketStatus.Offen
                                                       || t.Status == TicketStatus.InBearbeitung);
@@ -114,7 +112,6 @@
     </div>
 </div>
 
-<!-- Pager -->
 @if ((int)ViewBag.TotalPages > 1)
 {
     <nav class="mt-3">

@@ -24,22 +24,55 @@
                 </button>
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                     <ul class="navbar-nav flex-grow-1">
+
+                        @* ── Home ── *@
                         <li class="nav-item">
-                            <a class="nav-link text-body @(ViewContext.RouteData.Values["controller"]?.ToString() == "Home" ? "active fw-bold" : "")"
+                            <a class="nav-link text-body @(
+                                                               ViewContext.RouteData.Values["controller"]?.ToString() == "Home" &&
+                                                               string.IsNullOrEmpty(ViewContext.RouteData.Values["area"]?.ToString())
+                                                               ? "active fw-bold" : "")"
                                    asp-area="" asp-controller="Home" asp-action="Index">
                                 <i class="bi bi-house me-1"></i>Home
                             </a>
                         </li>
+
+                        @* ── Tickets ── *@
                         <li class="nav-item">
-                            <a class="nav-link text-body @(ViewContext.RouteData.Values["controller"]?.ToString() == "Tickets" ? "active fw-bold" : "")"
+                            <a class="nav-link text-body @(
+                                                               ViewContext.RouteData.Values["controller"]?.ToString() == "Tickets"
+                                                               ? "active fw-bold" : "")"
                                    asp-area="" asp-controller="Tickets" asp-action="Index">
                                 <i class="bi bi-ticket-perforated me-1"></i>Tickets
                             </a>
                         </li>
+
+                        @* ── Admin-Links: nur für Admins ── *@
+                        @if (User.Identity?.IsAuthenticated == true && User.IsInRole("Admin"))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-body @(
+                                                                       ViewContext.RouteData.Values["area"]?.ToString() == "Admin" &&
+                                                                       ViewContext.RouteData.Values["controller"]?.ToString() == "Projects"
+                                                                       ? "active fw-bold" : "")"
+                                       asp-area="Admin" asp-controller="Projects" asp-action="Index">
+                                    <i class="bi bi-folder me-1"></i>Projekte
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-body @(
+                                                                       ViewContext.RouteData.Values["area"]?.ToString() == "Admin" &&
+                                                                       ViewContext.RouteData.Values["controller"]?.ToString() == "Users"
+                                                                       ? "active fw-bold" : "")"
+                                       asp-area="Admin" asp-controller="Users" asp-action="Index">
+                                    <i class="bi bi-people me-1"></i>Benutzer
+                                </a>
+                            </li>
+                        }
+
                     </ul>
                 </div>
 
-                <!-- Dark Mode Toggle — bleibt als Icon, aber mit Abstand -->
+                <!-- Dark Mode Toggle -->
                 <button id="darkModeToggle" onclick="toggleDarkMode()"
                         class="btn btn-sm btn-outline-secondary me-2"
                         title="Theme wechseln"
@@ -140,7 +173,7 @@
             });
     </script>
 
-    <!-- Toast Container -->
+    <!-- Toast  -->
     <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 9999">
         <div id="appToast" class="toast align-items-center border-0" role="alert">
             <div class="d-flex">

@@ -10,7 +10,7 @@ namespace Ticket_System.Data
         {
             var db = serviceProvider.GetRequiredService<AppDbContext>();
 
-            // Tickets ohne gültigen Status auf "Offen" setzen
+            // ohne gültigen Status auf "Offen"
             var gueltigeStatus = TicketStatus.Alle;
             var ungueltigeTickets = await db.Tickets
                 .Where(t => !gueltigeStatus.Contains(t.Status))
@@ -26,7 +26,7 @@ namespace Ticket_System.Data
             var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
             var userManager = serviceProvider.GetRequiredService<UserManager<IdentityUser>>();
 
-            // --- Rollen anlegen ---
+            // Rollen
             string[] roles = { "Admin", "Developer", "Tester" };
             foreach (var role in roles)
             {
@@ -34,7 +34,7 @@ namespace Ticket_System.Data
                     await roleManager.CreateAsync(new IdentityRole(role));
             }
 
-            // --- Benutzer anlegen ---
+            // Benutzer
             await CreateUserAsync(userManager, "admin@ticket.de", "Admin123", "Admin");
             await CreateUserAsync(userManager, "dev@ticket.de", "Admin123", "Developer");
             await CreateUserAsync(userManager, "tester@ticket.de", "Admin123", "Tester");
@@ -42,7 +42,7 @@ namespace Ticket_System.Data
             await CreateUserAsync(userManager, "dev1@ticket.de", "Admin123", "Developer");
             await CreateUserAsync(userManager, "tester1@ticket.de", "Admin123", "Tester");
 
-            // --- Projekte und Tickets anlegen ---
+            // Projekte und Tickets
             if (await db.Projects.AnyAsync()) return;
 
             var admin = await userManager.FindByEmailAsync("admin@ticket.de");

@@ -32,9 +32,6 @@ body > .container {
     flex: 1;
 }
 
-/* =============================================
-   Tabellen: Schatten, Zebra-Streifen, Hover
-   ============================================= */
 
 .table-responsive {
     border-radius: 8px;
@@ -94,9 +91,7 @@ table.table {
     box-shadow: 0 6px 24px rgba(0, 0, 0, 0.9);
 }
 
-/* =============================================
-   Card Header Outline
-   ============================================= */
+/*   Card Header Outline*/
 
 .card-header-outline-primary {
     background-color: transparent;
@@ -116,9 +111,7 @@ table.table {
     color: var(--bs-danger);
 }
 
-/* =============================================
-   Badge Outline — Dark Mode (var reicht)
-   ============================================= */
+/*   Badge Outline — Dark Mode (var reicht)*/
 
 .badge-outline-secondary {
     background-color: transparent;
@@ -156,9 +149,6 @@ table.table {
     color: var(--bs-info);
 }
 
-/* =============================================
-   Badge Outline — Light Mode Fixes
-   ============================================= */
 
 /* Gelb ist auf hellem Hintergrund nicht lesbar → dunkleres Orange */
 [data-bs-theme="light"] .badge-outline-warning {
@@ -177,7 +167,6 @@ table.table {
     border-color: #0a7a8f;
     color: #0a7a8f;
 }
-/* ===== DELETE MODAL — theme-aware ===== */
 
 /* --- HELL MODUS (Standard Bootstrap bleibt, nur kleine Anpassungen) --- */
 #deleteModal .modal-header {
@@ -207,7 +196,6 @@ table.table {
     color: var(--bs-body-color);
 }
 
-/* ===== Navbar User Dropdown ===== */
 .nav-user-btn {
     border: 1px solid rgba(128, 128, 128, 0.25);
     border-radius: 6px;
@@ -246,9 +234,6 @@ table.table {
     font-size: 0.9rem;
 }
 
-/* =============================================
-   Карточки — 3D-эффект как у таблиц
-   ============================================= */
 
 .card-3d {
     border-radius: 8px;

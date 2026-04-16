@@ -6,7 +6,7 @@ namespace Ticket_System.Controllers
 {
     public class AccountController : Controller
     {
-        // SignInManager: zuständig für Login und Logout
+        // SignInManager
         private readonly SignInManager<IdentityUser> _signInManager;
 
         public AccountController(SignInManager<IdentityUser> signInManager)
@@ -14,14 +14,14 @@ namespace Ticket_System.Controllers
             _signInManager = signInManager;
         }
 
-        // GET: /Account/Login  → zeigt das Login-Formular
+        // GET: /Account/Login
         [HttpGet]
         public IActionResult Login()
         {
             return View();
         }
 
-        // POST: /Account/Login → verarbeitet das ausgefüllte Formular
+        // POST: /Account/Login
         [HttpPost]
         public async Task<IActionResult> Login(LoginViewModel model)
         {
@@ -39,7 +39,7 @@ namespace Ticket_System.Controllers
             return View(model);
         }
 
-        // POST: /Account/Logout → meldet den Benutzer ab
+        // POST: /Account/Logout
         [HttpPost]
         public async Task<IActionResult> Logout()
         {
@@ -47,7 +47,7 @@ namespace Ticket_System.Controllers
             return RedirectToAction("Index", "Home");
         }
 
-        // GET: /Account/AccessDenied → wird automatisch aufgerufen wenn kein Zugriff
+        // GET: /Account/AccessDenied
         [HttpGet]
         public IActionResult AccessDenied()
         {

@@ -11,7 +11,7 @@ namespace Ticket_System
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // ✅ Локально — MS SQL, на Railway — PostgreSQL
+            // Lokal — MS SQL, Railway — PostgreSQL
             if (builder.Environment.IsDevelopment())
             {
                 builder.Services.AddDbContext<AppDbContext>(options =>
@@ -45,12 +45,12 @@ namespace Ticket_System
 
                 if (app.Environment.IsDevelopment())
                 {
-                    // ✅ Локально — применяем MS SQL миграции
+                    // Lokal MS SQL Migrationen
                     db.Database.Migrate();
                 }
                 else
                 {
-                    // ✅ Railway — БД уже есть, просто проверяем таблицы
+                    // Railway
                     db.Database.EnsureCreated();
                 }
 
