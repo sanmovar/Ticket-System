@@ -148,9 +148,11 @@ namespace Ticket_System.Controllers
                 .ToList();
 
             ViewBag.AlleTickets = await _context.Tickets
-                .Where(t => t.Id != id && t.ProjektId == ticket.ProjektId)
-                .OrderBy(t => t.Titel)
-                .ToListAsync();
+                 .Where(t => t.Id != id
+             && t.ProjektId == ticket.ProjektId
+             && t.Status != TicketStatus.Geloest)
+                 .OrderBy(t => t.Titel)
+                 .ToListAsync();
 
             return View(ticket);
         }

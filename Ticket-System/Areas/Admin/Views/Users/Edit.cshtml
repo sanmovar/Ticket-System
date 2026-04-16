@@ -29,8 +29,7 @@
             @if (!ViewData.ModelState.IsValid)
             {
                 <div class="alert alert-danger">
-                    @foreach (var error in ViewData.ModelState.Values
-                                            .SelectMany(v => v.Errors))
+                    @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
                     {
                         <div><i class="bi bi-exclamation-circle me-1"></i>@error.ErrorMessage</div>
                     }
@@ -48,8 +47,10 @@
             <div class="mb-3">
                 <label class="form-label fw-bold">
                     <i class="bi bi-shield me-1"></i>Rolle
+                    <span class="text-danger">*</span>
                 </label>
-                <select name="rolle" class="form-select">
+                @* ВАЖНО: name="rollen" совпадает с параметром контроллера List<string> rollen *@
+                <select name="rollen" class="form-select" required>
                     <option value="">— Keine Rolle —</option>
                     @foreach (var rolle in alleRollen)
                     {

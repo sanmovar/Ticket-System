@@ -1,44 +1,74 @@
-﻿@* @model Project
+﻿@model Ticket_System.Models.Project
 
 @{
     ViewData["Title"] = "Projekt löschen";
 }
 
 <div class="d-flex justify-content-between align-items-center mb-4">
-    <h2 class="fw-bold text-danger"><i class="bi bi-trash3 me-2"></i>Projekt löschen</h2>
-    <a asp-action="Index" class="btn btn-outline-secondary btn-sm">
+    <h2 class="fw-bold text-danger">
+        <i class="bi bi-trash3 me-2"></i>Projekt löschen
+    </h2>
+    <a asp-area="Admin" asp-controller="Projects" asp-action="Index"
+           class="btn btn-outline-secondary btn-sm">
         <i class="bi bi-arrow-left me-1"></i>Zurück
     </a>
 </div>
 
 <div class="card border-danger shadow-sm">
-    <div class="card-header badge-outline-danger fw-bold">
-        <i class="bi bi-exclamation-triangle me-2"></i>Wirklich löschen?
+    <div class="card-header bg-danger text-white fw-bold">
+        <i class="bi bi-exclamation-triangle me-2"></i>Achtung: Diese Aktion kann nicht rückgängig gemacht werden!
     </div>
     <div class="card-body">
-        <dl class="row mb-0">
-            <dt class="col-sm-3">Titel</dt>
-            <dd class="col-sm-9">@Html.DisplayFor(m => m.Titel)</dd>
+        <p class="mb-3 text-muted">
+            Möchten Sie das folgende Projekt wirklich löschen?
+            Alle zugehörigen Tickets, Kommentare und Abhängigkeiten werden ebenfalls gelöscht.
+        </p>
 
-            <dt class="col-sm-3">Beschreibung</dt>
-            <dd class="col-sm-9">@Html.DisplayFor(m => m.Beschreibung)</dd>
-
-            <dt class="col-sm-3">Startdatum</dt>
-            <dd class="col-sm-9">@Html.DisplayFor(m => m.Startdatum)</dd>
-
-            <dt class="col-sm-3">Enddatum</dt>
-            <dd class="col-sm-9">@Html.DisplayFor(m => m.Enddatum)</dd>
-        </dl>
+        <table class="table table-bordered w-auto">
+            <tr>
+                <th class="bg-light">Titel</th>
+                <td>@Model.Titel</td>
+            </tr>
+            <tr>
+                <th class="bg-light">Beschreibung</th>
+                <td>@(string.IsNullOrWhiteSpace(Model.Beschreibung) ? "—" : Model.Beschreibung)</td>
+            </tr>
+            <tr>
+                <th class="bg-light">Startdatum</th>
+                <td>@Model.Startdatum.ToString("dd.MM.yyyy")</td>
+            </tr>
+            <tr>
+                <th class="bg-light">Enddatum</th>
+                <td>@(Model.Enddatum.HasValue? Model.Enddatum.Value.ToString("dd.MM.yyyy") : "—")</td>
+            </tr>
+            <tr>
+                <th class="bg-light">Anzahl Tickets</th>
+                <td>
+                    @if (Model.Tickets != null && Model.Tickets.Any())
+                    {
+                        <span class="badge bg-warning text-dark">
+                            @Model.Tickets.Count Ticket(s) werden ebenfalls gelöscht
+                        </span>
+                    }
+                    else
+                    {
+                        <span class="text-muted">Keine Tickets</span>
+                    }
+                </td>
+            </tr>
+        </table>
     </div>
     <div class="card-footer d-flex gap-2">
-        <form asp-action="Delete">
-            <input type="hidden" asp-for="Id" />
-            <button type="submit" class="btn btn-outline-danger">
-                <i class="bi bi-trash3 me-1"></i>Ja, löschen
+        <form asp-area="Admin" asp-controller="Projects" asp-action="Delete"
+              asp-route-id="@Model.Id" method="post">
+            @Html.AntiForgeryToken()
+            <button type="submit" class="btn btn-danger btn-sm">
+                <i class="bi bi-trash3 me-1"></i>Ja, endgültig löschen
             </button>
         </form>
-        <a asp-action="Index" class="btn btn-outline-secondary">
+        <a asp-area="Admin" asp-controller="Projects" asp-action="Index"
+               class="btn btn-outline-secondary btn-sm">
             <i class="bi bi-x-circle me-1"></i>Abbrechen
         </a>
     </div>
-</div> *@
+</div>

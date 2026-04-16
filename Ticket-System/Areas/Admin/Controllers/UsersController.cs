@@ -127,9 +127,48 @@ namespace Ticket_System.Areas.Admin.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(string email, string passwort, List<string> rollen)
         {
-            if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(passwort))
+            // email prüfen
+            if (string.IsNullOrWhiteSpace(email))
             {
-                ModelState.AddModelError("", "E-Mail und Passwort sind Pflichtfelder.");
+                ModelState.AddModelError("", "E-Mail ist ein Pflichtfeld.");
+            }
+            else
+            {
+                
+                var emailRegex = new System.Text.RegularExpressions.Regex(
+                    @"^[^@\s]+@[^@\s]+\.[^@\s]{2,}$",
+                    System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+
+                if (!emailRegex.IsMatch(email))
+                {
+                    ModelState.AddModelError("", "Die E-Mail-Adresse ist ungültig. Beispiel: benutzer@example.de");
+                }
+            }
+
+            // Passwort prüfen
+            if (string.IsNullOrWhiteSpace(passwort))
+            {
+                ModelState.AddModelError("", "Passwort ist ein Pflichtfeld.");
+            }
+            else if (passwort.Length < 6)
+            {
+                ModelState.AddModelError("", "Das Passwort muss mindestens 6 Zeichen lang sein.");
+            }
+            else if (!passwort.Any(char.IsUpper))
+            {
+                ModelState.AddModelError("", "Das Passwort muss mindestens einen Großbuchstaben enthalten.");
+            }
+            else if (!passwort.Any(char.IsLower))
+            {
+                ModelState.AddModelError("", "Das Passwort muss mindestens einen Kleinbuchstaben enthalten.");
+            }
+            else if (!passwort.Any(char.IsDigit))
+            {
+                ModelState.AddModelError("", "Das Passwort muss mindestens eine Zahl enthalten.");
+            }
+
+            if (!ModelState.IsValid)
+            {
                 ViewBag.AlleRollen = await _roleManager.Roles.Select(r => r.Name!).ToListAsync();
                 return View();
             }
@@ -167,7 +206,7 @@ namespace Ticket_System.Areas.Admin.Controllers
             if (user == null) return NotFound();
 
             var aktuellerBenutzer = await _userManager.GetUserAsync(User);
-            if (user.Id == aktuellerBenutzer!.Id)
+            if (aktuellerBenutzer != null && user.Id == aktuellerBenutzer.Id)
             {
                 TempData["Error"] = "Sie können Ihren eigenen Account nicht löschen.";
                 return RedirectToAction(nameof(Index));
@@ -186,7 +225,7 @@ namespace Ticket_System.Areas.Admin.Controllers
             if (user == null) return NotFound();
 
             var aktuellerBenutzer = await _userManager.GetUserAsync(User);
-            if (user.Id == aktuellerBenutzer!.Id)
+            if (aktuellerBenutzer != null && user.Id == aktuellerBenutzer.Id)
             {
                 TempData["Error"] = "Sie können Ihren eigenen Account nicht löschen.";
                 return RedirectToAction(nameof(Index));
