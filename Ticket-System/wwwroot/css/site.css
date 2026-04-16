@@ -245,3 +245,27 @@ table.table {
     height: 36px;
     font-size: 0.9rem;
 }
+
+/* =============================================
+   Карточки — 3D-эффект как у таблиц
+   ============================================= */
+
+.card-3d {
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+    .card-3d:hover {
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+        transform: translateY(-2px);
+    }
+
+[data-bs-theme="dark"] .card-3d {
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.9);
+}
+
+    [data-bs-theme="dark"] .card-3d:hover {
+        box-shadow: 0 10px 32px rgba(0, 0, 0, 1);
+        transform: translateY(-2px);
+    }

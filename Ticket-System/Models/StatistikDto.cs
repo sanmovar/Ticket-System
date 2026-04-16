@@ -12,7 +12,7 @@
         public int ProjekteAktiv { get; set; }
         public int ProjekteBeendet { get; set; }
 
-        // Benutzer-Statistiken (optional)
+        // Benutzer-Statistiken
         public int BenutzerGesamt { get; set; }
         public int AnzahlAdmins { get; set; }
         public int AnzahlDeveloper { get; set; }
