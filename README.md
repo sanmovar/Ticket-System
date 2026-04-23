@@ -53,16 +53,16 @@ Example:
 ## Screenshots
 
 ### Home / Dashboard
-<img src="./screenshots/dashboard.png" alt="Dashboard" width="900" />
+<img src="./Ticket-System/screenshots/dashboard.png" alt="Dashboard" width="900" />
 
 ### Ticket Overview
-<img src="./screenshots/tickets-overview.png" alt="Ticket overview" width="900" />
+<img src="./Ticket-System/screenshots/tickets-overview.png" alt="Ticket overview" width="900" />
 
 ### Ticket Details
-<img src="./screenshots/ticket-details.png" alt="Ticket details" width="900" />
+<img src="./Ticket-System/screenshots/ticket-details.png" alt="Ticket details" width="900" />
 
 ### Admin Panel
-<img src="./screenshots/admin-panel.png" alt="Admin Panel" width="900" />
+<img src="./Ticket-System/screenshots/admin-panel.png" alt="Admin Panel" width="900" />
 
 ## Purpose
 
