@@ -61,6 +61,7 @@ Example:
 ### Ticket Details
 <img src="./Ticket-System/screenshots/ticket-details.png" alt="Ticket details" width="900" />
 
+
 ### Admin Panel
 <img src="./Ticket-System/screenshots/admin-panel.png" alt="Admin Panel" width="900" />
 
