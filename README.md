@@ -62,7 +62,7 @@ Example:
 <img src="./screenshots/ticket-details.png" alt="Ticket details" width="900" />
 
 ### Admin Panel
-<img src="https://github.com/sanmovar/Ticket-System/blob/master/Ticket-System/screenshots/admin-panel.png" alt="Admin panel" width="900" />
+<img src="./screenshots/admin-panel.png" alt="Admin Panel" width="900" />
 
 ## Purpose
 
