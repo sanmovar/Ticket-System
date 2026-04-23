@@ -50,15 +50,19 @@ Add screenshots here to show the UI and important features.
 
 Example:
 
-```md
 ## Screenshots
 
-### Dashboard
-
+### Home / Dashboard
+<img src="./screenshots/dashboard.png" alt="Dashboard" width="900" />
 
 ### Ticket Overview
+<img src="./screenshots/tickets-overview.png" alt="Ticket overview" width="900" />
 
-```
+### Ticket Details
+<img src="./screenshots/ticket-details.png" alt="Ticket details" width="900" />
+
+### Admin Panel
+<img src="./screenshots/admin-panel.png" alt="Admin panel" width="900" />
 
 ## Purpose
 
