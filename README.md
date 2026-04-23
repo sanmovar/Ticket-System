@@ -141,10 +141,6 @@ This project was created to improve practical knowledge in:
 **Andrey Movshovich**  
 Junior .NET / Web Developer in retraining
 
-## Contact
-
-If you want to connect professionally, you can add your LinkedIn or email here.
-
 ## License
 
 This project is for learning and portfolio purposes.
